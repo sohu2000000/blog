@@ -5,8 +5,6 @@
 
 [教学视频](#t)
 
-[bootsec加载内核system程序及SETUP程序初始执行](http://toutiao.com/item/6655543854214676996/ "bootsec加载内核system程序及SETUP程序初始执行")
-
 [1. 载入SYSTEM代码](#1)
 
 [2. 确认根文件系统设备号](#2)
@@ -18,6 +16,8 @@
 [直达底部](#e)
 
 <h2 id = 't'> 教学视频 </h2>
+
+[bootsec加载内核system程序及SETUP程序初始执行](http://toutiao.com/item/6655543854214676996/ "bootsec加载内核system程序及SETUP程序初始执行")
 
 <h2 id = '1'> 1. 载入SYSTEM代码 </h2>
   
