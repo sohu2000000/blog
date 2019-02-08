@@ -13,6 +13,8 @@
 
 <h2 id = 't'> 教学视频 </h2>
 
+[VEDIO: Linux系统启动程序bootsec加载内核setup代码](http://toutiao.com/item/6655311281303585287/ "VEDIO: Linux系统启动程序bootsec加载内核setup代码")
+
 <h2 id = '1'> 1. BOOTSEC内存规划 </h2>
 
   BIOS 已经把 bootsect 也就是引导程序载入内存了，现在它的作用就是把第二批和第三批程序陆续加载到内存中。 为了把第二批和第三批程序加载到内存中的适当位置，bootsect首先做的工作就是 规划内存。
