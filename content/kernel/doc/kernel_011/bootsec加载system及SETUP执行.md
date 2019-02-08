@@ -1,5 +1,5 @@
 
-# bootsec加载内核system模块
+# bootsec加载内核system及SETUP初始执行
 
 <h2 id = 'm'> 目录 </h2>
 
