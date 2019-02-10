@@ -30,6 +30,7 @@
 
 [Linux内核启动：head程序开始执行(二)](http://toutiao.com/item/6656056858475758084/ "Linux内核启动：head程序开始执行(二)")
 
+[Linux内核启动：head程序开始执行(三)--分析setup_idt代码实现](http://toutiao.com/item/6656222683673395716/ "Linux内核启动：head程序开始执行(三)--分析setup_idt代码实现")
 
 <h2 id = '1'> 1. 整体过程描述 </h2>
   
@@ -99,12 +100,42 @@
 
 ![](https://i.imgur.com/sXgy9Gn.png)
 
+  setup idt 代码流程说明
+![](https://i.imgur.com/8XY87xV.png)
+
+一 拼接中断描述符的内容
+
+1. lea ignore_int,%edx 		将ignore\_int的段内偏移量 0x0000 5428 存储到 edx中，dx为低16位，即5428
+2. movl $0x00080000,%eax	将0x00080000存储到eax内，ax为低16位，即 0000
+3. movw %dx,%ax				将edx低16位5428，移动到ax，此时 eax的内容为 0x0008 5428
+4. movw $0x8E00,%dx			将0x8E00, 放到dx，此时 edx 内容为 0000 8E00
+
+中断描述符拼接完的效果如下：
+
+![](https://i.imgur.com/zTMwbNq.png)
+
+
+二 反复将拼接好的中断描述符存储到_idt,存储256次
+
+5.  lea _idt,%edi  			取得_idt基地址为目的地址
+6.  mov $256,%ecx			循环256次，初始化256个中断描述符
+7.  rp_sidt：				for 循环开始标号
+8.  movl %eax,(%edi)		把 eax 内容存储到描述符的低4个字节，即 0x 0008 5428
+9.  movl %edx,4(%edi)		把 edx 内容存储到描述符的高4个字节，即 0x 0000 8E00，此时已经填写完一个中断描述符
+10. dec %ecx				填写完一个描述符，循环变量减1
+11. jne rp_sidt				循环变量不为0，继续回到for循环开始处，继续初始化填写描述符
+12. lidt idt_descr			for循环完成，将_idt的基地址存放到idtr, 限长256项
+
 > LEA是微机8086/8088系列的一条指令，取自英语Load effect address——取有效地址，也就是取偏移地址。在微机8086/8088中有20位物理地址，由16位段基址向左偏移4位再与偏移地址之和得到。　
 　取偏移地址指令,指令格式如下：
 
 	LEA reg16,mem 
 
 > LEA指令将存储器操作数mem的4位16进制偏移地址送到指定的寄存器。这里，源操作数必须是存储器操作数，目标操作数必须是16位通用寄存器。因该寄存器常用来作为地址指针，故在此最好选用四个间址寄存器BX,BP,SI,DI之一。
+
+> movl: mov long ： 字长传送 ： 32位
+> movw: mov word：字传送 ：16位
+> movb: mov byte：字节传送 ：8位
 
 中断描述符结构如下
 
