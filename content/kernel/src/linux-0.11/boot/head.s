@@ -9,28 +9,28 @@
  *
  * NOTE!!! Startup happens at absolute address 0x00000000, which is also where
  * the page directory will exist. The startup code will be overwritten by
- * the page directory. 
+ * the page directory.
  */
 
- #head.s 含有32为启动代码
+ #head.s 含有32位启动代码
  #32位启动代码是从绝对地址 0x00000000 开始的，这里同样也是页目录即将存放的地方。
  #因此这里的启动代码将被页目录覆盖掉。
 .text
 .globl _idt,_gdt,_pg_dir,_tmp_floppy_area
-_pg_dir:                # 页目录将会存放到这里
+_pg_dir:                # 页目录将会存放到这里( head 起始位置: 0x00000000)
 
 
 
 # 这里已经处于 32 为模式，这里 $0x10 并不是并不是把地址 0x10 装入各个段寄存器，是全局描述符表中
 # 的偏移值，就是段选择符。
-# 这里 $0x10 的含义是，请求特权级0(0-1=0),选择全局描述符表(位2=0),选择全局描述符表中第二个段描述符(位3-15=2)。
-# 它正好指向表中的数据段描述符。
+# 这里 $0x10 的含义是，请求特权级0(0-1=0),选择全局描述符表(位2=0),选择全局描述符表中index = 2的第三个段描述符，内核数据段描述符(位3-15=2)。
+# 它正好指向表中的内核数据段描述符。
 #
 # 下面代码的含义是：设置ds,es,fs,gs 为 setup.s 中构造的数据段的选择符=0x10。并将堆栈
 # 设置在stack_start 指向的 user_stack 数组区，然后使用本程序后面定义的中断描述符表和全局描述符表。
 # 新的全局描述符表内容与setup.s中基本一样，仅段限长从8MB修改为 16MB。
 #
-startup_32:                     # 设置各个数据段寄存器
+startup_32:                 # 设置各个数据段寄存器
 	movl $0x10,%eax         # gnu 汇编，每个直接操作数需要以'$'开头，否则表示地址
 	mov %ax,%ds             # 每个寄存器名都需要以'%'开头，eax表示的是32为的ax寄存器
 	mov %ax,%es
@@ -94,8 +94,8 @@ check_x87:
  *  written by the page tables.
  */
 setup_idt:
-	lea ignore_int,%edx
-	movl $0x00080000,%eax
+	lea ignore_int,%edx   /*程序先让所有的中断描述符默认指向ignore_int这个位置 */
+	movl $0x00080000,%eax /*8应该看成1000，这个值在第2章初始化IDT时会用到 */
 	movw %dx,%ax		/* selector = 0x0008 = cs */
 	movw $0x8E00,%dx	/* interrupt gate - dpl=0, present */
 
@@ -129,16 +129,16 @@ setup_gdt:
  * using 4 of them to span 16 Mb of physical memory. People with
  * more than 16MB will have to expand this.
  */
-.org 0x1000
+.org 0x1000  # 4K 第一个页表页面pg0起始地址
 pg0:
 
-.org 0x2000
+.org 0x2000  # 8K 第二个页表页面pg1起始地址
 pg1:
 
-.org 0x3000
+.org 0x3000  # 12K 第二个页表页面pg2起始地址
 pg2:
 
-.org 0x4000
+.org 0x4000  # 16K 第三个页表页面pg3起始地址
 pg3:
 
 .org 0x5000
@@ -162,6 +162,7 @@ L6:
 				# just in case, we know what happens.
 
 /* This is the default interrupt "handler" :-) */
+/* 默认中断处理程序，打印一个字符串，处理程序名字为忽略中断*/
 int_msg:
 	.asciz "Unknown interrupt\n\r"
 .align 2
@@ -226,7 +227,7 @@ setup_paging:
 	movl $0xfff007,%eax		/*  16Mb - 4096 + 7 (r/w user,p) */
 	std
 1:	stosl			/* fill pages backwards - more efficient :-) */
-	subl $0x1000,%eax
+	subl $0x1000,%eax  /*eax指向向前一个页面的起始地址, 从eax = 0xfff007开始，eax = eax - 0x1000(4096, 4KB)*/
 	jge 1b
 	xorl %eax,%eax		/* pg_dir is at 0x0000 */
 	movl %eax,%cr3		/* cr3 - page directory start */
@@ -238,13 +239,13 @@ setup_paging:
 .align 2
 .word 0
 idt_descr:
-	.word 256*8-1		# idt contains 256 entries
-	.long _idt
+	.word 256*8-1		# idt contains 256 entries  idt限长
+	.long _idt          # idt 基地址
 .align 2
 .word 0
 gdt_descr:
-	.word 256*8-1		# so does gdt (not that that's any
-	.long _gdt		# magic number, but it works for me :^)
+	.word 256*8-1		# so does gdt (not that that's any  限长 0x7FF
+	.long _gdt		# magic number, but it works for me :^) gdt 基地址
 
 	.align 3
 _idt:	.fill 256,8,0		# idt is uninitialized

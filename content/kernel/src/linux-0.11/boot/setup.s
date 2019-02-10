@@ -214,10 +214,10 @@ end_move:
 	.word	0x00eb,0x00eb
 
 ! linux 系统硬件中断号被设置成从 0x20开始
-	mov	al,#0x20		! start of hardware int's (0x20)
+	mov	al,#0x20		! start of hardware int's (0x20 = 32)
 	out	#0x21,al                ! 发送主芯片 ICW2 命令字，设置其实中断号，要送奇端口
 	.word	0x00eb,0x00eb
-	mov	al,#0x28		! start of hardware int's 2 (0x28)
+	mov	al,#0x28		! start of hardware int's 2 (0x28 = 40)
 	out	#0xA1,al                ! 发送从芯片 ICW2 命令字，设置其实中断号。
 	.word	0x00eb,0x00eb
 	mov	al,#0x04		! 8259-1 is master
@@ -285,12 +285,12 @@ idt_48:
 	.word	0,0			! idt base=0L
 
 ! 这是加载全局描述符表寄存器 gdtr 指令要求的6字节操作数，前两个字节是gdt表的限长。
-! 后4字节是gdt表的线性基地址。 4字节的线性基地址为 0x0009 <<16 + 0x0200 +gdt
+! 后4字节是gdt表的线性基地址。 4字节的线性基地址为 0x0009 <<16(0x90000) + 0x0200(512) +gdt
 ！即 0x90200+gdt ，gdt表的限长设置为2KB，共256个表项。
 gdt_48:
 	.word	0x800		! gdt limit=2048, 256 GDT entries
 	.word	512+gdt,0x9	! gdt base = 0X9xxxx
-	
+
 .text
 endtext:
 .data
