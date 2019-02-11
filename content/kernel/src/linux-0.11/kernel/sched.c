@@ -43,25 +43,26 @@ void show_stat(void)
 			show_task(i,task[i]);
 }
 
-#define LATCH (1193180/HZ)
+#define LATCH (1193180/HZ) //每个时间片的震荡次数
 
 extern void mem_use(void);
 
 extern int timer_interrupt(void);
 extern int system_call(void);
 
-union task_union {
+union task_union { // task 与内核栈的共用体
 	struct task_struct task;
 	char stack[PAGE_SIZE];
 };
 
-static union task_union init_task = {INIT_TASK,};
+static union task_union init_task = {INIT_TASK,}; //进程0的task_struct
 
 long volatile jiffies=0;
 long startup_time=0;
 struct task_struct *current = &(init_task.task);
 struct task_struct *last_task_used_math = NULL;
 
+/* 初始化进程task[NR_TASK]的第一项为进程0，即task[0]为进程0占用*/
 struct task_struct * task[NR_TASKS] = {&(init_task.task), };
 
 long user_stack [ PAGE_SIZE>>2 ] ;
@@ -389,24 +390,24 @@ void sched_init(void)
 
 	if (sizeof(struct sigaction) != 16)
 		panic("Struct sigaction MUST be 16 bytes");
-	set_tss_desc(gdt+FIRST_TSS_ENTRY,&(init_task.task.tss));
-	set_ldt_desc(gdt+FIRST_LDT_ENTRY,&(init_task.task.ldt));
-	p = gdt+2+FIRST_TSS_ENTRY;
+	set_tss_desc(gdt+FIRST_TSS_ENTRY,&(init_task.task.tss)); //设置TSS0
+	set_ldt_desc(gdt+FIRST_LDT_ENTRY,&(init_task.task.ldt)); //设置LDT0
+	p = gdt+2+FIRST_TSS_ENTRY; //从gdt第六项，即TSS1开始向上全部清零，并且将进程槽从1往后的项清空，0项为进程0所用
 	for(i=1;i<NR_TASKS;i++) {
 		task[i] = NULL;
-		p->a=p->b=0;
+		p->a=p->b=0; //TSS清零
 		p++;
-		p->a=p->b=0;
+		p->a=p->b=0; //LDT清零
 		p++;
 	}
 /* Clear NT, so that we won't have troubles with that later on */
 	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl");
-	ltr(0);
-	lldt(0);
-	outb_p(0x36,0x43);		/* binary, mode 3, LSB/MSB, ch 0 */
-	outb_p(LATCH & 0xff , 0x40);	/* LSB */
+	ltr(0); //将TSS挂接到TR寄存器
+	lldt(0); //将LDT挂接到LDTR寄存器
+	outb_p(0x36,0x43);		/* binary, mode 3, LSB/MSB, ch 0 */ //设置定时器
+	outb_p(LATCH & 0xff , 0x40);	/* LSB */ //每10毫秒一中断, LATCH就是10秒一次
 	outb(LATCH >> 8 , 0x40);	/* MSB */
-	set_intr_gate(0x20,&timer_interrupt);
-	outb(inb_p(0x21)&~0x01,0x21);
-	set_system_gate(0x80,&system_call);
+	set_intr_gate(0x20,&timer_interrupt); //设定时钟中断，进程调度的基础
+	outb(inb_p(0x21)&~0x01,0x21);  //允许时钟中断  这里是允许了8259A芯片的相关引脚可以发送中断，但是CPU还处于关中断状态，不会真正响应中断, 只是表示计算机有发送时钟中断给CPU的能力了
+	set_system_gate(0x80,&system_call); //设定系统调用总入口
 }

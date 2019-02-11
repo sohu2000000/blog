@@ -48,6 +48,7 @@ struct i387_struct {
 	long	st_space[20];	/* 8*10 bytes for each FP-reg = 80 bytes */
 };
 
+/*TSS 要保存的现场信息，里面有很多需要保留和恢复的寄存器，其中16比特寄存器(如ss,es,cs)的高16bit为0,32bit寄存器保存都long中*/
 struct tss_struct {
 	long	back_link;	/* 16 high bits zero */
 	long	esp0;
@@ -101,7 +102,7 @@ struct task_struct {
 	unsigned long close_on_exec;
 	struct file * filp[NR_OPEN];
 /* ldt for this task 0 - zero 1 - cs 2 - ds&ss */
-	struct desc_struct ldt[3];
+	struct desc_struct ldt[3]; /*3个分别是NULL，代码段描述符，数据段描述符*/
 /* tss for this task */
 	struct tss_struct tss;
 };
@@ -110,11 +111,14 @@ struct task_struct {
  *  INIT_TASK is used to set up the first task table, touch at
  * your own risk!. Base=0, limit=0x9ffff (=640kB)
  */
+/*
+ * 进程0的task_struct
+ * /
 #define INIT_TASK \
-/* state etc */	{ 0,15,15, \
+/* state etc */	{ 0,15,15, \  //就绪态，15个时间片 
 /* signals */	0,{{},},0, \
 /* ec,brk... */	0,0,0,0,0,0, \
-/* pid etc.. */	0,-1,0,0,0, \
+/* pid etc.. */	0,-1,0,0,0, \  //进程号0
 /* uid etc */	0,0,0,0,0,0, \
 /* alarm */	0,0,0,0,0,0, \
 /* math */	0, \
@@ -150,8 +154,8 @@ extern void wake_up(struct task_struct ** p);
  * Entry into gdt where to find first TSS. 0-nul, 1-cs, 2-ds, 3-syscall
  * 4-TSS0, 5-LDT0, 6-TSS1 etc ...
  */
-#define FIRST_TSS_ENTRY 4
-#define FIRST_LDT_ENTRY (FIRST_TSS_ENTRY+1)
+#define FIRST_TSS_ENTRY 4   //GDT的index=4项，即TSS0入口
+#define FIRST_LDT_ENTRY (FIRST_TSS_ENTRY+1) // index = 5 LDT0入口 
 #define _TSS(n) ((((unsigned long) n)<<4)+(FIRST_TSS_ENTRY<<3))
 #define _LDT(n) ((((unsigned long) n)<<4)+(FIRST_LDT_ENTRY<<3))
 #define ltr(n) __asm__("ltr %%ax"::"a" (_TSS(n)))

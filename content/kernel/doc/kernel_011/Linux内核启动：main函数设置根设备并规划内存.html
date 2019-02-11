@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Linux内核启动：main函数设置根设备并规划内存</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+</head>
+<body>
+<h1>Linux内核启动：main函数设置根设备并规划内存</h1>
+<h2 id = 'm'> 目录 </h2>
+<p><a href="#t">教学视频</a></p>
+<p><a href="#1">1. 楔子</a></p>
+<p><a href="#2">2. 设置根设备和硬盘</a></p>
+<p><a href="#3">3. 规划物理内存</a></p>
+<p><a href="#e">直达底部</a></p>
+<h2 id = 't'> 教学视频 </h2>
+<h2 id = '1'> 1. 楔子 </h2>
+<p>从现在开始执行 main（）函数！ 目的就是让用户程序能够以“进程”的方式正常运行。 </p>
+<p>能够实现这一目的的标准包括三方面的内容：</p>
+<ol>
+<li>用户程序能够在主机上进行运算，</li>
+<li>能够与外设进行交互</li>
+<li>能够让用户以它为媒介进行人机交互。 </li>
+</ol>
+<p>所以main函数需要完成对设备环境进行初始化，并激活第一个进程——进程 0。</p>
+<p>用户进程运行应该互不干扰，需要要靠系统给进程设计一套“边界” 来对其进行保护。 这套“边界”就是系统为进程提供的进程管理信息数据结构，该结构包括： task_struct、task[64]、GDT 等。</p>
+<ul>
+<li>task_struct是每个进程所独有的结构，标识了进程的各项属性值，包括剩余时间片、进程执行状态、局部数据描述符表（LDT）和任务状态描述符表（TSS）等。 </li>
+<li>task[64] 和 GDT是为管理多进程提供的数据结构。task[64]结构中存储着系统中所有进程的task_struct指针。如果操作系统需要对多个进程加以比较并选择，就可以通过遍历task[64]结构来实现。 </li>
+<li>GDT中存储着一套针对所有进程的索引结构。通过索引项，操作系统可以间接地与每个进程中的LDT和TSS建立关系。</li>
+</ul>
+<p>其他还包括有操作系统对内存、CPU、串行口、显示器、键盘、硬盘、软盘等硬件进行设置，并将这些硬件所对应的中断服务程序与IDT相挂接，为进程 0及其直接、间接创建的所有后续进程与外设沟通 构建环境等，这些，我们将在后面的文章中逐个进行讲解。</p>
+<p><a href="#m">返回目录</a></p>
+<h2 id = '2'> 2. 设置根设备和硬盘 </h2>
+<p>内核首先初始化根设备和硬盘，用bootsect中写入机器系统数据0x901FC的根设备为软盘/硬盘的信息，设置软盘/硬盘为根设备，并用起始自0x90080的32字节的机器系统数据的硬盘参数表设置内核中的硬盘 信息drive_info。</p>
+<p>这里用到了系统开始存储的机器系统数据，我们看一下内存，回忆一下</p>
+<p><img src="https://i.imgur.com/CTI4OLs.png" /></p>
+<p>实现代码如下</p>
+<p><img src="https://i.imgur.com/dtvw19v.png" /></p>
+<p><img src="https://i.imgur.com/UYBcQW5.png" /></p>
+<p>存储机器信息如下</p>
+<p><img src="https://i.imgur.com/iZtnq1o.png" /></p>
+<p><a href="#m">返回目录</a></p>
+<h2 id = '3'> 3. 规划物理内存 </h2>
+<p>main函数接下来设置缓冲区、虚拟盘、主内存，具体规划如下：除内核代码和数据所占的内存空间之外，其余物理内存主要分为三部分，分别是 <strong>主内存区、缓冲区和虚拟盘</strong>。 </p>
+<ul>
+<li>主内存区是进程代码运行的空间，也包括内核管理进程的数据结构； </li>
+<li>缓冲区主要作为主机与外设进行数据交互的中转站；</li>
+<li>“虚拟盘区”是一个可选的区域，如果选择使用虚拟盘，就可以将外设上的数据先复制进虚拟盘区，然后加以使用。由于从内存中操作数据的速度远高于外设，因此这样可以提高系统执行效率。</li>
+</ul>
+<p>系统main函数要对主内存中的这三种不同性质的区域，在大小、位置以及管理方式方面进行规划。先 根据内存大小对缓冲区和主内存区的位置和大小进行初步设置。</p>
+<p><img src="https://i.imgur.com/BKHP7lg.png" /></p>
+<p>实现代码如下
+<img src="https://i.imgur.com/vGxagaH.png" /></p>
+<p><img src="https://i.imgur.com/NQL0GTn.png" /></p>
+<blockquote>
+<p>&lt;&lt;20 或 &gt;&gt;20 相当于乘或除以1MB</p>
+<p>&lt;&lt;12 或 &gt;&gt;12 相当于乘或除以4KB（联想到页） </p>
+<p>&lt;&lt;10 或 &gt;&gt;10 相当于乘或除以1KB。 </p>
+<p>1 &lt;&lt; 20 就是 1 MB, EXT_MEM_K &lt;&lt; 10 就是 EXT<em>MEM</em>K（扩展内存的KB数）的字节数。</p>
+</blockquote>
+<p><a href="#m">返回目录</a></p>
+<p id = 'e'> </p>
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

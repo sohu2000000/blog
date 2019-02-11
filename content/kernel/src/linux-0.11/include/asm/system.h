@@ -50,16 +50,16 @@ __asm__ ("movw %%dx,%%ax\n\t" \
 		((limit) & 0x0ffff); }
 
 #define _set_tssldt_desc(n,addr,type) \
-__asm__ ("movw $104,%1\n\t" \
-	"movw %%ax,%2\n\t" \
-	"rorl $16,%%eax\n\t" \
-	"movb %%al,%3\n\t" \
-	"movb $" type ",%4\n\t" \
-	"movb $0x00,%5\n\t" \
-	"movb %%ah,%6\n\t" \
-	"rorl $16,%%eax" \
+__asm__ ("movw $104,%1\n\t" \   //将104，即01101000存入描述符的第1,2字节
+	"movw %%ax,%2\n\t" \  //将tss或ldt的基地址低16位存入描述符的3,4字节
+	"rorl $16,%%eax\n\t" \  //循环右移16位，即高、地字节互换
+	"movb %%al,%3\n\t" \  //将互换完的第一字节，即地址的第3字节存入第五字节
+	"movb $" type ",%4\n\t" \ //将0x89或0x82存入第6字节
+	"movb $0x00,%5\n\t" \ //将0x00存入第7字节
+	"movb %%ah,%6\n\t" \ //将互换完的第二字节，即地址的第4字节存入第8字节
+	"rorl $16,%%eax" \ //复原eax
 	::"a" (addr), "m" (*(n)), "m" (*(n+2)), "m" (*(n+4)), \
-	 "m" (*(n+5)), "m" (*(n+6)), "m" (*(n+7)) \
+	 "m" (*(n+5)), "m" (*(n+6)), "m" (*(n+7)) \ //“m"(*(n)) 是gdt第n项描述符的地址开始的内存单元；"m"(*(n+2))是gdt第n项描述符的地址向上3个字节开始的内存单元(index = 2);其他依次类推
 	)
 
 #define set_tss_desc(n,addr) _set_tssldt_desc(((char *) (n)),addr,"0x89")

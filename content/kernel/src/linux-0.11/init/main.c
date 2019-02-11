@@ -55,9 +55,9 @@ extern long startup_time;
 /*
  * This is set up by the setup-routine at boot-time
  */
-#define EXT_MEM_K (*(unsigned short *)0x90002)
-#define DRIVE_INFO (*(struct drive_info *)0x90080)
-#define ORIG_ROOT_DEV (*(unsigned short *)0x901FC)
+#define EXT_MEM_K (*(unsigned short *)0x90002)      // 从1MB开始的扩展内存(KB)数，前面汇编代码已经将这个数据读取存储到了 0x90002这个位置
+#define DRIVE_INFO (*(struct drive_info *)0x90080) /*硬盘参数表，根据结构类型直接取得32位，即80和90, 硬盘参数表1和硬盘参数表2都保存到了DRIVE_INFO中*/
+#define ORIG_ROOT_DEV (*(unsigned short *)0x901FC) //根设备号
 
 /*
  * Yeah, yeah, it's ugly, but I cannot find how to do this correctly
@@ -99,7 +99,8 @@ static long memory_end = 0;
 static long buffer_memory_end = 0;
 static long main_memory_start = 0;
 
-struct drive_info { char dummy[32]; } drive_info;
+/*存放硬盘参数表的数据结构*/
+struct drive_info { char dummy[32]; } drive_info; /* 存放硬盘参数表的数据结构,  0x10 = 16; 硬盘参数表 1：0x9000:0x0080  硬盘参数表 2，0x9000:0x0090 长度为 0x20 = 32字节*/
 
 void main(void)		/* This really IS void, no error here. */
 {			/* The startup routine assumes (well, ...) this */
@@ -107,19 +108,19 @@ void main(void)		/* This really IS void, no error here. */
  * Interrupts are still disabled. Do necessary setups, then
  * enable them
  */
- 	ROOT_DEV = ORIG_ROOT_DEV;
+ 	ROOT_DEV = ORIG_ROOT_DEV; /*根据bootsect写入机器系统数据的信息设置根设备为软盘的信息，设置根设备*/
  	drive_info = DRIVE_INFO;
-	memory_end = (1<<20) + (EXT_MEM_K<<10);
-	memory_end &= 0xfffff000;
-	if (memory_end > 16*1024*1024)
+	memory_end = (1<<20) + (EXT_MEM_K<<10); // 1MB + 扩展内存数（MB）数，即总内存数量, 注意这里得到的字节数
+	memory_end &= 0xfffff000;   // 按照页的倍数取整，忽略内存末端不足一页的部分 , memory_end也是系统有效内存的末端位置，超过这个位置的内存部分，在操作系统中不可见
+	if (memory_end > 16*1024*1024) /*大于16M，内存最大设置为16MB，因为24根地址线*/
 		memory_end = 16*1024*1024;
-	if (memory_end > 12*1024*1024) 
+	if (memory_end > 12*1024*1024) /*大于12M，小于16M，buffer尾部在4M*/
 		buffer_memory_end = 4*1024*1024;
-	else if (memory_end > 6*1024*1024)
+	else if (memory_end > 6*1024*1024) /*大于6M，小于12M，bufffer尾部在2M*/
 		buffer_memory_end = 2*1024*1024;
 	else
-		buffer_memory_end = 1*1024*1024;
-	main_memory_start = buffer_memory_end;
+		buffer_memory_end = 1*1024*1024; /*小于6MB，buffer尾部在1MB,也就是没有BUFFER*/
+	main_memory_start = buffer_memory_end; //缓冲区之后便是主内存,主内存起始位置
 #ifdef RAMDISK
 	main_memory_start += rd_init(main_memory_start, RAMDISK*1024);
 #endif
