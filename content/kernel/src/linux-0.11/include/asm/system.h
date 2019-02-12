@@ -1,20 +1,20 @@
-#define move_to_user_mode() \
+#define move_to_user_mode() \  //模仿中断硬件压栈顺序，ss,esp,eflags,cs,eip
 __asm__ ("movl %%esp,%%eax\n\t" \
-	"pushl $0x17\n\t" \
-	"pushl %%eax\n\t" \
-	"pushfl\n\t" \
-	"pushl $0x0f\n\t" \
-	"pushl $1f\n\t" \
-	"iret\n" \
-	"1:\tmovl $0x17,%%eax\n\t" \
+	"pushl $0x17\n\t" \  //SS进栈，0x17即二进制的10111(3特权级，LDT，数据段)
+	"pushl %%eax\n\t" \ //ESP进栈
+	"pushfl\n\t" \ //EFLAGS进栈
+	"pushl $0x0f\n\t" \ //CS进栈，0x0f即01111(3特权级，LDT, 数据段)
+	"pushl $1f\n\t" \ //EIP进栈
+	"iret\n" \ //出栈恢复现场，反战特权级从0到3
+	"1:\tmovl $0x17,%%eax\n\t" \ //下面的代码使得ds,es,fs,gs与ss一致
 	"movw %%ax,%%ds\n\t" \
 	"movw %%ax,%%es\n\t" \
 	"movw %%ax,%%fs\n\t" \
 	"movw %%ax,%%gs" \
 	:::"ax")
 
-#define sti() __asm__ ("sti"::)
-#define cli() __asm__ ("cli"::)
+#define sti() __asm__ ("sti"::) //开中断
+#define cli() __asm__ ("cli"::) //关中断
 #define nop() __asm__ ("nop"::)
 
 #define iret() __asm__ ("iret"::)

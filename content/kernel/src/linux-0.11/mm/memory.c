@@ -40,9 +40,9 @@ static inline volatile void oom(void)
 __asm__("movl %%eax,%%cr3"::"a" (0))
 
 /* these are not to be changed without changing head.s etc */
-#define LOW_MEM 0x100000	//内存低端
+#define LOW_MEM 0x100000	//内存低端 1MB
 #define PAGING_MEMORY (15*1024*1024)	//分页内存15MB，即主内存区最多15MB。
-#define PAGING_PAGES (PAGING_MEMORY>>12)	//分页后物理内存总页数。
+#define PAGING_PAGES (PAGING_MEMORY>>12)	//分页后物理内存总页数。15MB的页数
 #define MAP_NR(addr) (((addr)-LOW_MEM)>>12)	//将制定的内存地址映射为页号。
 #define USED 100	//页面被占用标志，见405行。
 
@@ -403,9 +403,9 @@ void mem_init(long start_mem, long end_mem)
 	HIGH_MEMORY = end_mem;
 	for (i=0 ; i<PAGING_PAGES ; i++)
 		mem_map[i] = USED;
-	i = MAP_NR(start_mem);
-	end_mem -= start_mem;
-	end_mem >>= 12;
+	i = MAP_NR(start_mem); //start_mem为6MB（虚拟盘之后）
+	end_mem -= start_mem; 
+	end_mem >>= 12; //16MB的页数
 	while (end_mem-->0)
 		mem_map[i++]=0;
 }

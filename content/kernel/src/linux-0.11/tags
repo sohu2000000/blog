@@ -103,7 +103,7 @@ CSIZE	include/termios.h	151;"	d
 CSTOPB	include/termios.h	156;"	d
 CURRENT	kernel/blk_drv/blk.h	93;"	d
 CURRENT_DEV	kernel/blk_drv/blk.h	94;"	d
-CURRENT_TIME	include/linux/sched.h	142;"	d
+CURRENT_TIME	include/linux/sched.h	146;"	d
 DAY	kernel/mktime.c	22;"	d	file:
 DEC	include/linux/tty.h	25;"	d
 DEFAULT_MAJOR_ROOT	tools/build.c	37;"	d	file:
@@ -214,9 +214,9 @@ FD_WRITE	include/linux/fdreg.h	63;"	d
 FF0	include/termios.h	128;"	d
 FF1	include/termios.h	129;"	d
 FFDLY	include/termios.h	127;"	d
-FIRST_LDT_ENTRY	include/linux/sched.h	154;"	d
+FIRST_LDT_ENTRY	include/linux/sched.h	158;"	d
 FIRST_TASK	include/linux/sched.h	7;"	d
-FIRST_TSS_ENTRY	include/linux/sched.h	153;"	d
+FIRST_TSS_ENTRY	include/linux/sched.h	157;"	d
 FLUSHO	include/termios.h	181;"	d
 FS	kernel/system_call.s	/^FS		= 0x10$/;"	d
 FULL	include/linux/tty.h	29;"	d
@@ -268,7 +268,6 @@ INITSEG	boot/bootsect.s	/^INITSEG  = 0x9000			! we move boot here - out of the w
 INITSEG	boot/setup.s	/^INITSEG  = 0x9000	! we move boot here - out of the way  åŸæ¥bootsectæ‰€å¤„çš„æ®µ$/;"	d
 INIT_C_CC	include/linux/tty.h	63;"	d
 INIT_REQUEST	kernel/blk_drv/blk.h	127;"	d
-INIT_TASK	include/linux/sched.h	113;"	d
 INLCR	include/termios.h	89;"	d
 INODES_PER_BLOCK	include/linux/fs.h	55;"	d
 INPCK	include/termios.h	87;"	d
@@ -453,7 +452,7 @@ O_RDONLY	include/fcntl.h	8;"	d
 O_RDWR	include/fcntl.h	10;"	d
 O_TRUNC	include/fcntl.h	14;"	d
 O_WRONLY	include/fcntl.h	9;"	d
-PAGE_ALIGN	include/linux/sched.h	186;"	d
+PAGE_ALIGN	include/linux/sched.h	190;"	d
 PAGE_SIZE	include/a.out.h	79;"	d
 PAGE_SIZE	include/a.out.h	88;"	d
 PAGE_SIZE	include/a.out.h	92;"	d
@@ -737,7 +736,7 @@ _HEAD_H	include/linux/head.h	2;"	d
 _HIGH	include/sys/wait.h	7;"	d
 _I_FLAG	kernel/chr_drv/tty_io.c	29;"	d	file:
 _L	include/ctype.h	5;"	d
-_LDT	include/linux/sched.h	156;"	d
+_LDT	include/linux/sched.h	160;"	d
 _LOW	include/sys/wait.h	6;"	d
 _L_FLAG	kernel/chr_drv/tty_io.c	28;"	d	file:
 _MM_H	include/linux/mm.h	2;"	d
@@ -792,7 +791,7 @@ _TIMES_H	include/sys/times.h	2;"	d
 _TIME_H	include/time.h	2;"	d
 _TIME_T	include/sys/types.h	10;"	d
 _TIME_T	include/time.h	5;"	d
-_TSS	include/linux/sched.h	155;"	d
+_TSS	include/linux/sched.h	159;"	d
 _TTY_H	include/linux/tty.h	10;"	d
 _U	include/ctype.h	4;"	d
 _UNISTD_H	include/unistd.h	2;"	d
@@ -907,7 +906,7 @@ _floppy_interrupt	kernel/system_call.s	/^_floppy_interrupt:$/;"	l
 _fs	kernel/traps.c	34;"	d	file:
 _gdt	boot/head.s	/^_gdt:	.quad 0x0000000000000000	\/* NULL descriptor *\/$/;"	l
 _general_protection	kernel/asm.s	/^_general_protection:$/;"	l
-_get_base	include/linux/sched.h	214;"	d
+_get_base	include/linux/sched.h	218;"	d
 _hashfn	fs/buffer.c	128;"	d	file:
 _hd_interrupt	kernel/system_call.s	/^_hd_interrupt:$/;"	l
 _idt	boot/head.s	/^_idt:	.fill 256,8,0		# idt is uninitialized$/;"	l
@@ -925,9 +924,9 @@ _reserved	kernel/asm.s	/^_reserved:$/;"	l
 _rs1_interrupt	kernel/chr_drv/rs_io.s	/^_rs1_interrupt:$/;"	l
 _rs2_interrupt	kernel/chr_drv/rs_io.s	/^_rs2_interrupt:$/;"	l
 _segment_not_present	kernel/asm.s	/^_segment_not_present:$/;"	l
-_set_base	include/linux/sched.h	188;"	d
+_set_base	include/linux/sched.h	192;"	d
 _set_gate	include/asm/system.h	22;"	d
-_set_limit	include/linux/sched.h	199;"	d
+_set_limit	include/linux/sched.h	203;"	d
 _set_seg_desc	include/asm/system.h	42;"	d
 _set_tssldt_desc	include/asm/system.h	52;"	d
 _stack_segment	kernel/asm.s	/^_stack_segment:$/;"	l
@@ -957,6 +956,7 @@ add_entry	fs/namei.c	/^static struct buffer_head * add_entry(struct m_inode * di
 add_request	kernel/blk_drv/ll_rw_blk.c	/^static void add_request(struct blk_dev_struct * dev, struct request * req)$/;"	f	file:	signature:(struct blk_dev_struct * dev, struct request * req)
 add_timer	include/linux/sched.h	/^extern void add_timer(long jiffies, void (*fn)(void));$/;"	p	signature:(long jiffies, void (*fn)(void))
 add_timer	kernel/sched.c	/^void add_timer(long jiffies, void (*fn)(void))$/;"	f	signature:(long jiffies, void (*fn)(void))
+addr	include/asm/system.h	/^	::"a" (addr), "m" (*(n)), "m" (*(n+2)), "m" (*(n+4)), \\$/;"	m	class:type
 after_page_tables	boot/head.s	/^after_page_tables:$/;"	l
 alarm	include/linux/sched.h	/^	long alarm;$/;"	m	struct:task_struct	access:public
 alarm	include/unistd.h	/^int alarm(int sec);$/;"	p	signature:(int sec)
@@ -1224,11 +1224,11 @@ do_tty_interrupt	kernel/chr_drv/tty_io.c	/^void do_tty_interrupt(int tty)$/;"	f	
 do_wp_page	mm/memory.c	/^void do_wp_page(unsigned long error_code,unsigned long address)$/;"	f	signature:(unsigned long error_code,unsigned long address)
 double_fault	kernel/traps.c	/^void double_fault(void);$/;"	p	file:	signature:(void)
 drive_busy	kernel/blk_drv/hd.c	/^static int drive_busy(void)$/;"	f	file:	signature:(void)
-drive_info	init/main.c	/^struct drive_info { char dummy[32]; } drive_info; \/* 0x10 = 16; Ó²ÅÌ²ÎÊı±í 1£º0x9000:0x0080  Ó²ÅÌ²ÎÊı±í 2£¬0x9000:0x0090 ³¤¶ÈÎª 0x20 = 32×Ö½Ú*\/$/;"	s	file:
-drive_info	init/main.c	/^struct drive_info { char dummy[32]; } drive_info; \/* 0x10 = 16; Ó²ÅÌ²ÎÊı±í 1£º0x9000:0x0080  Ó²ÅÌ²ÎÊı±í 2£¬0x9000:0x0090 ³¤¶ÈÎª 0x20 = 32×Ö½Ú*\/$/;"	v	typeref:struct:drive_info
-drive_info::dummy	init/main.c	/^struct drive_info { char dummy[32]; } drive_info; \/* 0x10 = 16; Ó²ÅÌ²ÎÊı±í 1£º0x9000:0x0080  Ó²ÅÌ²ÎÊı±í 2£¬0x9000:0x0090 ³¤¶ÈÎª 0x20 = 32×Ö½Ú*\/$/;"	m	struct:drive_info	file:	access:public
+drive_info	init/main.c	/^struct drive_info { char dummy[32]; } drive_info; \/* ´æ·ÅÓ²ÅÌ²ÎÊı±íµÄÊı¾İ½á¹¹,  0x10 = 16; Ó²ÅÌ²ÎÊı±í 1£º0x9000:0x0080  Ó²ÅÌ²ÎÊı±í 2£¬0x9000:0x0090 ³¤¶ÈÎª 0x20 = 32×Ö½Ú*\/$/;"	s	file:
+drive_info	init/main.c	/^struct drive_info { char dummy[32]; } drive_info; \/* ´æ·ÅÓ²ÅÌ²ÎÊı±íµÄÊı¾İ½á¹¹,  0x10 = 16; Ó²ÅÌ²ÎÊı±í 1£º0x9000:0x0080  Ó²ÅÌ²ÎÊı±í 2£¬0x9000:0x0090 ³¤¶ÈÎª 0x20 = 32×Ö½Ú*\/$/;"	v	typeref:struct:drive_info
+drive_info::dummy	init/main.c	/^struct drive_info { char dummy[32]; } drive_info; \/* ´æ·ÅÓ²ÅÌ²ÎÊı±íµÄÊı¾İ½á¹¹,  0x10 = 16; Ó²ÅÌ²ÎÊı±í 1£º0x9000:0x0080  Ó²ÅÌ²ÎÊı±í 2£¬0x9000:0x0090 ³¤¶ÈÎª 0x20 = 32×Ö½Ú*\/$/;"	m	struct:drive_info	file:	access:public
 ds	include/linux/sched.h	/^	long	ds;		\/* 16 high bits zero *\/$/;"	m	struct:tss_struct	access:public
-dummy	init/main.c	/^struct drive_info { char dummy[32]; } drive_info; \/* 0x10 = 16; Ó²ÅÌ²ÎÊı±í 1£º0x9000:0x0080  Ó²ÅÌ²ÎÊı±í 2£¬0x9000:0x0090 ³¤¶ÈÎª 0x20 = 32×Ö½Ú*\/$/;"	m	struct:drive_info	file:	access:public
+dummy	init/main.c	/^struct drive_info { char dummy[32]; } drive_info; \/* ´æ·ÅÓ²ÅÌ²ÎÊı±íµÄÊı¾İ½á¹¹,  0x10 = 16; Ó²ÅÌ²ÎÊı±í 1£º0x9000:0x0080  Ó²ÅÌ²ÎÊı±í 2£¬0x9000:0x0090 ³¤¶ÈÎª 0x20 = 32×Ö½Ú*\/$/;"	m	struct:drive_info	file:	access:public
 dup	include/unistd.h	/^int dup(int fildes);$/;"	p	signature:(int fildes)
 dup2	include/unistd.h	/^int dup2(int oldfd, int newfd);$/;"	p	signature:(int oldfd, int newfd)
 dupfd	fs/fcntl.c	/^static int dupfd(unsigned int fd, unsigned int arg)$/;"	f	file:	signature:(unsigned int fd, unsigned int arg)
@@ -1387,7 +1387,7 @@ gdt	boot/setup.s	/^gdt:$/;"	l
 gdt_48	boot/setup.s	/^gdt_48:$/;"	l
 gdt_descr	boot/head.s	/^gdt_descr:$/;"	l
 general_protection	kernel/traps.c	/^void general_protection(void);$/;"	p	file:	signature:(void)
-get_base	include/linux/sched.h	226;"	d
+get_base	include/linux/sched.h	230;"	d
 get_dir	fs/namei.c	/^static struct m_inode * get_dir(const char * pathname)$/;"	f	file:	signature:(const char * pathname)
 get_ds	include/asm/segment.h	/^extern inline unsigned long get_ds() $/;"	f	signature:()
 get_empty_inode	fs/inode.c	/^struct m_inode * get_empty_inode(void)$/;"	f	signature:(void)
@@ -1401,7 +1401,7 @@ get_fs_long	include/asm/segment.h	/^extern inline unsigned long get_fs_long(cons
 get_fs_word	include/asm/segment.h	/^extern inline unsigned short get_fs_word(const unsigned short *addr)$/;"	f	signature:(const unsigned short *addr)
 get_hash_table	fs/buffer.c	/^struct buffer_head * get_hash_table(int dev, int block)$/;"	f	signature:(int dev, int block)
 get_hash_table	include/linux/fs.h	/^extern struct buffer_head * get_hash_table(int dev, int block);$/;"	p	signature:(int dev, int block)
-get_limit	include/linux/sched.h	228;"	d
+get_limit	include/linux/sched.h	232;"	d
 get_new	kernel/signal.c	/^static inline void get_new(char * from,char * to)$/;"	f	file:	signature:(char * from,char * to)
 get_pipe_inode	fs/inode.c	/^struct m_inode * get_pipe_inode(void)$/;"	f	signature:(void)
 get_pipe_inode	include/linux/fs.h	/^extern struct m_inode * get_pipe_inode(void);$/;"	p	signature:(void)
@@ -1561,7 +1561,7 @@ last_pid	kernel/fork.c	/^long last_pid=0;$/;"	v
 last_task_used_math	kernel/sched.c	/^struct task_struct *last_task_used_math = NULL;$/;"	v	typeref:struct:task_struct
 ldiv_t	include/sys/types.h	/^typedef struct { long quot,rem; } ldiv_t;$/;"	t	typeref:struct:__anon3
 ldt	include/linux/sched.h	/^	long	ldt;		\/* 16 high bits zero *\/$/;"	m	struct:tss_struct	access:public
-ldt	include/linux/sched.h	/^	struct desc_struct ldt[3];$/;"	m	struct:task_struct	typeref:struct:task_struct::desc_struct	access:public
+ldt	include/linux/sched.h	/^	struct desc_struct ldt[3]; \/*3ä¸ªåˆ†åˆ«æ˜¯NULLï¼Œä»£ç æ®µæè¿°ç¬¦ï¼Œæ•°æ®æ®µæè¿°ç¬¦*\/$/;"	m	struct:task_struct	typeref:struct:task_struct::desc_struct	access:public
 leader	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct	access:public
 leds	kernel/chr_drv/keyboard.S	/^leds:	.byte 2		\/* num-lock, caps, scroll-lock mode (nom-lock on) *\/$/;"	l
 lf	kernel/chr_drv/console.c	/^static void lf(void)$/;"	f	file:	signature:(void)
@@ -1569,7 +1569,7 @@ line_status	kernel/chr_drv/rs_io.s	/^line_status:$/;"	l
 link	include/unistd.h	/^int link(const char * filename1, const char * filename2);$/;"	p	signature:(const char * filename1, const char * filename2)
 ll_rw_block	include/linux/fs.h	/^extern void ll_rw_block(int rw, struct buffer_head * bh);$/;"	p	signature:(int rw, struct buffer_head * bh)
 ll_rw_block	kernel/blk_drv/ll_rw_blk.c	/^void ll_rw_block(int rw, struct buffer_head * bh)$/;"	f	signature:(int rw, struct buffer_head * bh)
-lldt	include/linux/sched.h	158;"	d
+lldt	include/linux/sched.h	162;"	d
 load_setup	boot/bootsect.s	/^load_setup:$/;"	l
 localtime	include/time.h	/^struct tm *localtime(const time_t * tp);$/;"	p	signature:(const time_t * tp)
 lock_buffer	kernel/blk_drv/ll_rw_blk.c	/^static inline void lock_buffer(struct buffer_head * bh)$/;"	f	file:	signature:(struct buffer_head * bh)
@@ -1577,7 +1577,7 @@ lock_inode	fs/inode.c	/^static inline void lock_inode(struct m_inode * inode)$/;
 lock_super	fs/super.c	/^static void lock_super(struct super_block * sb)$/;"	f	file:	signature:(struct super_block * sb)
 lseek	include/unistd.h	/^int lseek(int fildes, off_t offset, int origin);$/;"	p	signature:(int fildes, off_t offset, int origin)
 lshift	kernel/chr_drv/keyboard.S	/^lshift:$/;"	l
-ltr	include/linux/sched.h	157;"	d
+ltr	include/linux/sched.h	161;"	d
 lzone	kernel/blk_drv/hd.c	/^	int head,sect,cyl,wpcom,lzone,ctl;$/;"	m	struct:hd_i_struct	file:	access:public
 m_inode	include/linux/fs.h	/^struct m_inode {$/;"	s
 m_inode::i_atime	include/linux/fs.h	/^	unsigned long i_atime;$/;"	m	struct:m_inode	access:public
@@ -1638,6 +1638,8 @@ mount_root	fs/super.c	/^void mount_root(void)$/;"	f	signature:(void)
 mount_root	include/linux/fs.h	/^extern void mount_root(void);$/;"	p	signature:(void)
 move_to_user_mode	include/asm/system.h	1;"	d
 msg1	boot/bootsect.s	/^msg1:                                   !è°ƒç”¨BIOSä¸­æ–­æ˜¾ç¤ºçš„ä¿¡æ¯$/;"	l
+n	include/asm/system.h	/^	 "m" (*(n+5)), "m" (*(n+6)), "m" (*(n+7)) \\ \/\/â€œm"(*(n)) æ˜¯gdtç¬¬né¡¹æè¿°ç¬¦çš„åœ°å€å¼€å§‹çš„å†…å­˜å•å…ƒï¼›"m"(*(n+2))æ˜¯gdtç¬¬né¡¹æè¿°ç¬¦çš„åœ°å€å‘ä¸Š3ä¸ªå­—èŠ‚å¼€å§‹çš„å†…å­˜å•å…ƒ(index = 2);å…¶ä»–ä¾æ¬¡ç±»æ¨$/;"	v
+n	include/asm/system.h	/^	::"a" (addr), "m" (*(n)), "m" (*(n+2)), "m" (*(n+4)), \\$/;"	v
 n_desc	include/a.out.h	/^  short n_desc;$/;"	m	struct:nlist	access:public
 n_name	include/a.out.h	/^    char *n_name;$/;"	m	union:nlist::__anon1	access:public
 n_next	include/a.out.h	/^    struct nlist *n_next;$/;"	m	union:nlist::__anon1	typeref:struct:nlist::__anon1::nlist	access:public
@@ -1920,7 +1922,7 @@ selected	kernel/blk_drv/floppy.c	/^unsigned char selected = 0;$/;"	v
 send_break	kernel/chr_drv/tty_ioctl.c	/^static void send_break(struct tty_struct * tty)$/;"	f	file:	signature:(struct tty_struct * tty)
 send_sig	kernel/exit.c	/^static inline int send_sig(long sig,struct task_struct * p,int priv)$/;"	f	file:	signature:(long sig,struct task_struct * p,int priv)
 session	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct	access:public
-set_base	include/linux/sched.h	211;"	d
+set_base	include/linux/sched.h	215;"	d
 set_bit	fs/bitmap.c	19;"	d	file:
 set_bit	fs/super.c	22;"	d	file:
 set_cursor	kernel/chr_drv/console.c	/^static inline void set_cursor(void)$/;"	f	file:	signature:(void)
@@ -1930,7 +1932,7 @@ set_fs	include/asm/segment.h	/^extern inline void set_fs(unsigned long val)$/;"	
 set_intr_gate	include/asm/system.h	33;"	d
 set_ldt_desc	include/asm/system.h	66;"	d
 set_leds	kernel/chr_drv/keyboard.S	/^set_leds:$/;"	l
-set_limit	include/linux/sched.h	212;"	d
+set_limit	include/linux/sched.h	216;"	d
 set_origin	kernel/chr_drv/console.c	/^static inline void set_origin(void)$/;"	f	file:	signature:(void)
 set_system_gate	include/asm/system.h	39;"	d
 set_termio	kernel/chr_drv/tty_ioctl.c	/^static int set_termio(struct tty_struct * tty, struct termio * termio)$/;"	f	file:	signature:(struct tty_struct * tty, struct termio * termio)
@@ -2041,7 +2043,7 @@ sti	include/asm/system.h	16;"	d
 stime	include/linux/sched.h	/^	long utime,stime,cutime,cstime,start_time;$/;"	m	struct:task_struct	access:public
 stime	include/unistd.h	/^int stime(time_t * tptr);$/;"	p	signature:(time_t * tptr)
 stopped	include/linux/tty.h	/^	int stopped;$/;"	m	struct:tty_struct	access:public
-str	include/linux/sched.h	159;"	d
+str	include/linux/sched.h	163;"	d
 strcat	include/string.h	/^extern inline char * strcat(char * dest,const char * src)$/;"	f	signature:(char * dest,const char * src)
 strchr	include/string.h	/^extern inline char * strchr(const char * s,char c)$/;"	f	signature:(const char * s,char c)
 strcmp	include/string.h	/^extern inline int strcmp(const char * cs,const char * ct)$/;"	f	signature:(const char * cs,const char * ct)
@@ -2082,7 +2084,7 @@ super_block::s_zmap	include/linux/fs.h	/^	struct buffer_head * s_zmap[8];$/;"	m	
 super_block::s_zmap_blocks	include/linux/fs.h	/^	unsigned short s_zmap_blocks;$/;"	m	struct:super_block	access:public
 suser	include/linux/kernel.h	21;"	d
 swd	include/linux/sched.h	/^	long	swd;$/;"	m	struct:i387_struct	access:public
-switch_to	include/linux/sched.h	171;"	d
+switch_to	include/linux/sched.h	175;"	d
 sync	include/unistd.h	/^int sync(void);$/;"	p	signature:(void)
 sync_dev	fs/buffer.c	/^int sync_dev(int dev)$/;"	f	signature:(int dev)
 sync_dev	fs/super.c	/^int sync_dev(int dev);$/;"	p	file:	signature:(int dev)
@@ -2267,7 +2269,7 @@ task_struct::exit_code	include/linux/sched.h	/^	int exit_code;$/;"	m	struct:task
 task_struct::father	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct	access:public
 task_struct::filp	include/linux/sched.h	/^	struct file * filp[NR_OPEN];$/;"	m	struct:task_struct	typeref:struct:task_struct::file	access:public
 task_struct::gid	include/linux/sched.h	/^	unsigned short gid,egid,sgid;$/;"	m	struct:task_struct	access:public
-task_struct::ldt	include/linux/sched.h	/^	struct desc_struct ldt[3];$/;"	m	struct:task_struct	typeref:struct:task_struct::desc_struct	access:public
+task_struct::ldt	include/linux/sched.h	/^	struct desc_struct ldt[3]; \/*3ä¸ªåˆ†åˆ«æ˜¯NULLï¼Œä»£ç æ®µæè¿°ç¬¦ï¼Œæ•°æ®æ®µæè¿°ç¬¦*\/$/;"	m	struct:task_struct	typeref:struct:task_struct::desc_struct	access:public
 task_struct::leader	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct	access:public
 task_struct::pgrp	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct	access:public
 task_struct::pid	include/linux/sched.h	/^	long pid,father,pgrp,session,leader;$/;"	m	struct:task_struct	access:public
@@ -2432,6 +2434,7 @@ tty_write	include/linux/sched.h	/^extern int tty_write(unsigned minor,char * buf
 tty_write	include/linux/tty.h	/^int tty_write(unsigned c, char * buf, int n);$/;"	p	signature:(unsigned c, char * buf, int n)
 tty_write	kernel/chr_drv/tty_io.c	/^int tty_write(unsigned channel, char * buf, int nr)$/;"	f	signature:(unsigned channel, char * buf, int nr)
 twd	include/linux/sched.h	/^	long	twd;$/;"	m	struct:i387_struct	access:public
+type::addr	include/asm/system.h	/^	::"a" (addr), "m" (*(n)), "m" (*(n+2)), "m" (*(n+4)), \\$/;"	m	class:type
 tzset	include/time.h	/^void tzset(void);$/;"	p	signature:(void)
 u_char	include/sys/types.h	/^typedef unsigned char u_char;$/;"	t
 uid	include/linux/sched.h	/^	unsigned short uid,euid,suid;$/;"	m	struct:task_struct	access:public

@@ -49,17 +49,17 @@ void do_rd_request(void)
 /*
  * Returns amount of memory which needs to be reserved.
  */
-long rd_init(long mem_start, int length)
+long rd_init(long mem_start, int length) //hd_init(), floppy_init()与此类似
 {
 	int	i;
 	char	*cp;
 
-	blk_dev[MAJOR_NR].request_fn = DEVICE_REQUEST;
+	blk_dev[MAJOR_NR].request_fn = DEVICE_REQUEST; //挂接do_rd_request
 	rd_start = (char *) mem_start;
 	rd_length = length;
 	cp = rd_start;
 	for (i=0; i < length; i++)
-		*cp++ = '\0';
+		*cp++ = '\0'; //初始化为0
 	return(length);
 }
 

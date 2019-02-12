@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Linux内核启动：main函数设置根深并规划内存</title>
+<title>Linux内核启动：虚拟盘空间设置和内存管理结构初始化</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style type="text/css">
 /* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
@@ -291,59 +291,36 @@ img {
 </style>
 </head>
 <body>
-<h1>Linux内核启动：main函数设置根深并规划内存</h1>
+<h1>Linux内核启动：虚拟盘空间设置和内存管理结构初始化</h1>
 <h2 id = 'm'> 目录 </h2>
 <p><a href="#t">教学视频</a></p>
-<p><a href="#1">1. 楔子</a></p>
-<p><a href="#2">2. 设置根设备和硬盘</a></p>
-<p><a href="#3">3. 规划物理内存</a></p>
+<p><a href="#1">1. 设置虚拟盘并初始化</a></p>
+<p><a href="#2">2. 初始化内存管理结构mem_map</a></p>
 <p><a href="#e">直达底部</a></p>
 <h2 id = 't'> 教学视频 </h2>
-<h2 id = '1'> 1. 楔子 </h2>
-<p>从现在开始执行 main（）函数！ 目的就是让用户程序能够以“进程”的方式正常运行。 </p>
-<p>能够实现这一目的的标准包括三方面的内容：</p>
-<ol>
-<li>用户程序能够在主机上进行运算，</li>
-<li>能够与外设进行交互</li>
-<li>能够让用户以它为媒介进行人机交互。 </li>
-</ol>
-<p>所以main函数需要完成对设备环境进行初始化，并激活第一个进程——进程 0。</p>
-<p>用户进程运行应该互不干扰，需要要靠系统给进程设计一套“边界” 来对其进行保护。 这套“边界”就是系统为进程提供的进程管理信息数据结构，该结构包括： task_struct、task[64]、GDT 等。</p>
-<ul>
-<li>task_struct是每个进程所独有的结构，标识了进程的各项属性值，包括剩余时间片、进程执行状态、局部数据描述符表（LDT）和任务状态描述符表（TSS）等。 </li>
-<li>task[64] 和 GDT是为管理多进程提供的数据结构。task[64]结构中存储着系统中所有进程的task_struct指针。如果操作系统需要对多个进程加以比较并选择，就可以通过遍历task[64]结构来实现。 </li>
-<li>GDT中存储着一套针对所有进程的索引结构。通过索引项，操作系统可以间接地与每个进程中的LDT和TSS建立关系。</li>
-</ul>
-<p>其他还包括有操作系统对内存、CPU、串行口、显示器、键盘、硬盘、软盘等硬件进行设置，并将这些硬件所对应的中断服务程序与IDT相挂接，为进程 0及其直接、间接创建的所有后续进程与外设沟通 构建环境等，这些，我们将在后面的文章中逐个进行讲解。</p>
-<p><a href="#m">返回目录</a></p>
-<h2 id = '2'> 2. 设置根设备和硬盘 </h2>
-<p>内核首先初始化根设备和硬盘，用bootsect中写入机器系统数据0x901FC的根设备为软盘/硬盘的信息，设置软盘/硬盘为根设备，并用起始自0x90080的32字节的机器系统数据的硬盘参数表设置内核中的硬盘 信息drive_info。</p>
-<p>这里用到了系统开始存储的机器系统数据，我们看一下内存，回忆一下</p>
-<p><img src="https://i.imgur.com/CTI4OLs.png" /></p>
+<h2 id = '1'> 1. 设置虚拟盘并初始化 </h2>
+<p>接下来main函数将对外设中的虚拟盘区进行设置。 检查makefile文件中“虚拟盘使用标志”是否设置， 以此确定系统是否使用了虚拟盘（假设有虚拟盘，大小设置为2 MB）。 操作系统从缓冲区的末端起开辟2MB内存空间设置为虚拟盘，主内存起始位置后移2MB至虚拟盘的末端</p>
+<p><img src="https://i.imgur.com/rQ7VB4b.png" /></p>
 <p>实现代码如下</p>
-<p><img src="https://i.imgur.com/dtvw19v.png" /></p>
-<p><img src="https://i.imgur.com/UYBcQW5.png" /></p>
-<p>存储机器信息如下</p>
-<p><img src="https://i.imgur.com/iZtnq1o.png" /></p>
+<p><img src="https://i.imgur.com/MQ59zo4.png" /></p>
+<p><img src="https://i.imgur.com/5Td81Ze.png" /></p>
+<p><img src="https://i.imgur.com/cp0UPDy.png" /></p>
+<p><img src="https://i.imgur.com/bBHxdXB.png" /></p>
+<p><img src="https://i.imgur.com/GaWGxds.png" /></p>
+<p><img src="https://i.imgur.com/nm35tTI.png" /></p>
+<p>在rd_init（）函数中，先要将虚拟盘区的请求项处理函数do<em>rd</em>request（）请求项函数控制结构blk<em>dev[7]的第二项挂接。 blk<em>dev[7]的主要功能是将某一类设备与它对应的请求项处理函数挂钩。 目前操作系统最多可以管理6类设备。 这个挂接动作意味着以后内核内核能够通过调用do</em>rd</em>request函数处理与虚拟盘相关的请求项操作。挂接之后，将虚拟盘所在的内存区域全部初始化为0。</p>
+<p><img src="https://i.imgur.com/dxXDXNG.png" /></p>
+<p>最后将虚拟盘区的长度值返回。这个返回值将用来重新设置主内存区的起始位置。</p>
 <p><a href="#m">返回目录</a></p>
-<h2 id = '3'> 3. 规划物理内存 </h2>
-<p>main函数接下来设置缓冲区、虚拟盘、主内存，具体规划如下：除内核代码和数据所占的内存空间之外，其余物理内存主要分为三部分，分别是 <strong>主内存区、缓冲区和虚拟盘</strong>。 </p>
-<ul>
-<li>主内存区是进程代码运行的空间，也包括内核管理进程的数据结构； </li>
-<li>缓冲区主要作为主机与外设进行数据交互的中转站；</li>
-<li>“虚拟盘区”是一个可选的区域，如果选择使用虚拟盘，就可以将外设上的数据先复制进虚拟盘区，然后加以使用。由于从内存中操作数据的速度远高于外设，因此这样可以提高系统执行效率。</li>
-</ul>
-<p>系统main函数要对主内存中的这三种不同性质的区域，在大小、位置以及管理方式方面进行规划。先 根据内存大小对缓冲区和主内存区的位置和大小进行初步设置。</p>
-<p><img src="https://i.imgur.com/BKHP7lg.png" /></p>
-<p>实现代码如下
-<img src="https://i.imgur.com/vGxagaH.png" /></p>
-<p><img src="https://i.imgur.com/NQL0GTn.png" /></p>
-<blockquote>
-<p>&lt;&lt;20 或 &gt;&gt;20 相当于乘或除以1MB</p>
-<p>&lt;&lt;12 或 &gt;&gt;12 相当于乘或除以4KB（联想到页） </p>
-<p>&lt;&lt;10 或 &gt;&gt;10 相当于乘或除以1KB。 </p>
-<p>1 &lt;&lt; 20 就是 1 MB, EXT_MEM_K &lt;&lt; 10 就是 EXT<em>MEM</em>K（扩展内存的KB数）的字节数。</p>
-</blockquote>
+<h2 id = '2'> 2. 初始化内存管理结构mem_map </h2>
+<p>对主内存区起始位置的重新确定，标志着主内存区和缓冲区的位置和大小已经全都确定，系统 开始调用mem_init()函数。 先对主内存区的管理结构进行设置。</p>
+<p><img src="https://i.imgur.com/XZlKITJ.png" /></p>
+<p>代码实现如下</p>
+<p><img src="https://i.imgur.com/I2fnZhr.png" /></p>
+<p><img src="https://i.imgur.com/08BFdAI.png" /></p>
+<p><img src="https://i.imgur.com/WKLE99H.png" /></p>
+<p>系统通过mem<em>map[]对1MB以上的内存分页进行管理，记录一个页面的使用次数。 
+  mem</em>init()函数先将所有的内存页面使用计数均设置成USED（100，即被使用），然后再将主 内存中的所有页面使用计数全部清零，系统以后只把使用计数为0的页面视为空闲页面。系统不对1MB以内的内存空间用这种分页方法管理，是因为操作系统对内核和用户进程采用了两套不同 的分页管理方法。内核采用分页管理方法，线性地址和物理地址是完全一样的，是一一映射的，等价于内核可以直接获得物理地址。用户进程线性地址和物理地址差异很大，之间没有可递推的 逻辑关系。操作系统目的就是让用户进程无法通过线性地址推算出具体的物理地址，让内核能够 访问用户进程，用户进程不能访问其他的用户进程，更不能访问内核。 1MB以内是内核代码和 只有由内核管控的大部分数据所在内存空间，是绝对不允许用户进程访问的。 1MB以上，特别是 主内存区主要是用户进程的代码、数据所在内存空间，所以采用专门用来管理用户进程的分页管理方法。</p>
 <p><a href="#m">返回目录</a></p>
 <p id = 'e'> </p>
 </body>
