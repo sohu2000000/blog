@@ -20,15 +20,15 @@ __asm__ ("movl %%esp,%%eax\n\t" \
 #define iret() __asm__ ("iret"::)
 
 #define _set_gate(gate_addr,type,dpl,addr) \
-__asm__ ("movw %%dx,%%ax\n\t" \
-	"movw %0,%%dx\n\t" \
-	"movl %%eax,%1\n\t" \
-	"movl %%edx,%2" \
-	: \
-	: "i" ((short) (0x8000+(dpl<<13)+(type<<8))), \
-	"o" (*((char *) (gate_addr))), \
-	"o" (*(4+(char *) (gate_addr))), \
-	"d" ((char *) (addr)),"a" (0x00080000))
+__asm__ ("movw %%dx,%%ax\n\t" \ //将edx的低字赋值给eax低字
+	"movw %0,%%dx\n\t" \ //%0对应第二个冒号后面的第一行的"i"
+	"movl %%eax,%1\n\t" \ //%1对应第二个冒号后面的第二行的"o"
+	"movl %%edx,%2" \  //%2对应第二个冒号后面第三行的"o"
+	: \ //这个冒号后面是输出，下面冒号后面是输入
+	: "i" ((short) (0x8000+(dpl<<13)+(type<<8))), \ //立即数
+	"o" (*((char *) (gate_addr))), \ //中断描述符前4个字节的地址
+	"o" (*(4+(char *) (gate_addr))), \ //中断描述符后4个字节的地址
+	"d" ((char *) (addr)),"a" (0x00080000)) //"d"对应edx, "a"对应eax
 
 #define set_intr_gate(n,addr) \
 	_set_gate(&idt[n],14,0,addr)
