@@ -189,6 +189,7 @@ __asm__("cmpl %%ecx,_current\n\t" \
 
 #define PAGE_ALIGN(n) (((n)+0xfff)&0xfffff000)
 
+/*用base设置addr所对应的描述符*/
 #define _set_base(addr,base) \
 __asm__("movw %%dx,%0\n\t" \
 	"rorl $16,%%edx\n\t" \
@@ -212,9 +213,11 @@ __asm__("movw %%dx,%0\n\t" \
 	  "d" (limit) \
 	:"dx")
 
+/*用base地址设置ldt所指向的描述符*/
 #define set_base(ldt,base) _set_base( ((char *)&(ldt)) , base )
 #define set_limit(ldt,limit) _set_limit( ((char *)&(ldt)) , (limit-1)>>12 )
 
+/*获取addr指向段描述符中的base段基地址*/
 #define _get_base(addr) ({\
 unsigned long __base; \
 __asm__("movb %3,%%dh\n\t" \
@@ -227,8 +230,13 @@ __asm__("movb %3,%%dh\n\t" \
 	 "m" (*((addr)+7))); \
 __base;})
 
+/*取得ldt所指向的段描述符的基地址*/
 #define get_base(ldt) _get_base( ((char *)&(ldt)) )
 
+/*
+ * 取得段segment(段选择子)的限长(如果颗粒度标志为0，则段限长值的单位是字节；如果设置了颗粒度标志，则段限长值使用4KB单位)
+ * lsll 是加载段界限的指令，把 segment 段描述符中的段界限字段装入__limit，函数返回__limit 加 1，即段长
+ */
 #define get_limit(segment) ({ \
 unsigned long __limit; \
 __asm__("lsll %1,%0\n\tincl %0":"=r" (__limit):"r" (segment)); \

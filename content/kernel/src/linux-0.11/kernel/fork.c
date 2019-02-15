@@ -36,13 +36,27 @@ void verify_area(void * addr,int size)
 	}
 }
 
+/*
+ * 设置子进程的代码段，数据段及创建、复制子进程的第一个页表
+ */
 int copy_mem(int nr,struct task_struct * p)
 {
 	unsigned long old_data_base,new_data_base,data_limit;
 	unsigned long old_code_base,new_code_base,code_limit;
 
-	code_limit=get_limit(0x0f);
-	data_limit=get_limit(0x17);
+    /*
+     * 取得子进程的代码、数据段限长
+     *
+     * 关于局部表数据段描述符的选择符为什么是(0x17)，段选择子的格式一共16位，高13位表示段描述符在描述符表中的索引，
+     * 接下来一位，即第[2]位TI指示位，用于指示此描述符为GDT还是LDT，[2]=0表示描述符在GDT中，而[2]=1,表示在LDT表中！,
+     * 接下来[1][0]为RPL位，用于指示当进程对段访问第请求权限,
+     * 而：0x17=0000 0000 0001 0111,表示所以是LDT表中的第二项(数据段描述符).
+     *     0x0f=0000 0000 0000 1111,表示LDT表中第一项（代码段描述符）,
+     *     第0项为空描述符,在linux-0.11版本中LDT中只有三项：NULL描述符,数据段描述符,代码段描述符。
+     */
+
+	code_limit=get_limit(0x0f); //0x0f即01111：代码段(index = 01 代码段)，LDT(1)，3特权级(11)
+	data_limit=get_limit(0x17); //0x17即10111：数据段(index = 10 数据段)，LDT(1)，3特权级(11)
 	old_code_base = get_base(current->ldt[1]);
 	old_data_base = get_base(current->ldt[2]);
 	if (old_data_base != old_code_base)
