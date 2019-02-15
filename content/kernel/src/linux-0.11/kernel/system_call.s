@@ -206,15 +206,15 @@ _sys_execve:
 
 .align 2
 _sys_fork:
-	call _find_empty_process
+	call _find_empty_process #调用find_empty_process()如果返回的是-EAGAIN(11)，说明已经有64个进程在运行
 	testl %eax,%eax
 	js 1f
-	push %gs
+	push %gs  #5个push也作为copy_process的参数初始
 	pushl %esi
 	pushl %edi
 	pushl %ebp
 	pushl %eax
-	call _copy_process
+	call _copy_process #调用copy_process()
 	addl $20,%esp
 1:	ret
 

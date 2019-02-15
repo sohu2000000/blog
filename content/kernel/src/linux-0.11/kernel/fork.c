@@ -68,16 +68,17 @@ int copy_mem(int nr,struct task_struct * p)
 int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 		long ebx,long ecx,long edx,
 		long fs,long es,long ds,
-		long eip,long cs,long eflags,long esp,long ss)
+		long eip,long cs,long eflags,long esp,long ss) //注意：这些参数是 int 0x80、system_call、sys_fork多次累积压栈的结果，顺序玩去是一致的
 {
 	struct task_struct *p;
 	int i;
 	struct file *f;
 
+    // 在16MB 内存的最高端获取一页，强制类型转换的潜台词是讲这个页当task_union使用
 	p = (struct task_struct *) get_free_page();
 	if (!p)
 		return -EAGAIN;
-	task[nr] = p;
+	task[nr] = p;  //此时的nr就是1，指向进程1的task_struct页面
 	*p = *current;	/* NOTE! this doesn't copy the supervisor stack */
 	p->state = TASK_UNINTERRUPTIBLE;
 	p->pid = last_pid;
@@ -132,16 +133,21 @@ int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 	return last_pid;
 }
 
+/*
+ * 为新创建的进程找到一个空闲的位置， NR_TASKS是64
+ */
 int find_empty_process(void)
 {
 	int i;
 
 	repeat:
-		if ((++last_pid)<0) last_pid=1;
+		if ((++last_pid)<0) last_pid=1; //如果++后last_pid溢出，则置1
+        //现在，++后last_pid为1，找到有效的last_pid
 		for(i=0 ; i<NR_TASKS ; i++)
-			if (task[i] && task[i]->pid == last_pid) goto repeat;
-	for(i=1 ; i<NR_TASKS ; i++)
+			if (task[i] && task[i]->pid == last_pid) goto repeat; //条件成立说明pid已经被last_pid已经被使用，last_pid++，直到获得用于新进程的进程好 
+    //返回第一个空闲的i
+	for(i=1 ; i<NR_TASKS ; i++) //第二次遍历task[64],获得一个空闲的i，成为任务号
 		if (!task[i])
 			return i;
-	return -EAGAIN;
+	return -EAGAIN; //EAGAIN是11
 }

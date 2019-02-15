@@ -3,7 +3,7 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.8	//
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 ABRT_ERR	include/linux/hdreg.h	47;"	d
 ACC_MODE	fs/namei.c	21;"	d	file:
 ALRMMASK	kernel/chr_drv/tty_io.c	17;"	d	file:
@@ -956,6 +956,7 @@ add_entry	fs/namei.c	/^static struct buffer_head * add_entry(struct m_inode * di
 add_request	kernel/blk_drv/ll_rw_blk.c	/^static void add_request(struct blk_dev_struct * dev, struct request * req)$/;"	f	file:	signature:(struct blk_dev_struct * dev, struct request * req)
 add_timer	include/linux/sched.h	/^extern void add_timer(long jiffies, void (*fn)(void));$/;"	p	signature:(long jiffies, void (*fn)(void))
 add_timer	kernel/sched.c	/^void add_timer(long jiffies, void (*fn)(void))$/;"	f	signature:(long jiffies, void (*fn)(void))
+addr	include/asm/system.h	/^	"d" ((char *) (addr)),"a" (0x00080000)) \/\/"d"对应edx, "a"对应eax$/;"	v
 addr	include/asm/system.h	/^	::"a" (addr), "m" (*(n)), "m" (*(n+2)), "m" (*(n+4)), \\$/;"	m	class:type
 after_page_tables	boot/head.s	/^after_page_tables:$/;"	l
 alarm	include/linux/sched.h	/^	long alarm;$/;"	m	struct:task_struct	access:public
@@ -1383,6 +1384,8 @@ fstat	include/unistd.h	/^int fstat(int fildes, struct stat * stat_buf);$/;"	p	si
 func	kernel/chr_drv/keyboard.S	/^func:$/;"	l
 func_table	kernel/chr_drv/keyboard.S	/^func_table:$/;"	l
 gap	kernel/blk_drv/floppy.c	/^	unsigned char gap,rate,spec1;$/;"	m	struct:floppy_struct	file:	access:public
+gate_addr	include/asm/system.h	/^	"o" (*((char *) (gate_addr))), \\ \/\/中断描述符前4个字节的地址$/;"	v
+gate_addr	include/asm/system.h	/^	"o" (*(4+(char *) (gate_addr))), \\ \/\/中断描述符后4个字节的地址$/;"	v
 gdt	boot/setup.s	/^gdt:$/;"	l
 gdt_48	boot/setup.s	/^gdt_48:$/;"	l
 gdt_descr	boot/head.s	/^gdt_descr:$/;"	l
@@ -1772,7 +1775,7 @@ r_symbolnum	include/a.out.h	/^  unsigned int r_symbolnum:24;$/;"	m	struct:reloca
 raise	include/signal.h	/^int raise(int sig);$/;"	p	signature:(int sig)
 rate	kernel/blk_drv/floppy.c	/^	unsigned char gap,rate,spec1;$/;"	m	struct:floppy_struct	file:	access:public
 rd_init	init/main.c	/^extern long rd_init(long mem_start, int length);$/;"	p	file:	signature:(long mem_start, int length)
-rd_init	kernel/blk_drv/ramdisk.c	/^long rd_init(long mem_start, int length)$/;"	f	signature:(long mem_start, int length)
+rd_init	kernel/blk_drv/ramdisk.c	/^long rd_init(long mem_start, int length) \/\/hd_init(), floppy_init()与此类似$/;"	f	signature:(long mem_start, int length)
 rd_length	kernel/blk_drv/ramdisk.c	/^int	rd_length = 0;$/;"	v
 rd_load	kernel/blk_drv/hd.c	/^extern void rd_load(void);$/;"	p	file:	signature:(void)
 rd_load	kernel/blk_drv/ramdisk.c	/^void rd_load(void)$/;"	f	signature:(void)

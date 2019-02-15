@@ -50,6 +50,7 @@ extern void mem_use(void);
 extern int timer_interrupt(void);
 extern int system_call(void);
 
+/*大小正好一个页面*/
 union task_union { // task 与内核栈的共用体
 	struct task_struct task;
 	char stack[PAGE_SIZE];

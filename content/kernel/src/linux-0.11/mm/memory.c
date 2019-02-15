@@ -60,25 +60,28 @@ static unsigned char mem_map [ PAGING_PAGES ] = {0,};    //物理内存映射字
  * Get physical address of first (actually last :-) free page, and mark it
  * used. If no free pages left, return 0.
  */
+/*
+ * 遍历mem_map[],找到主内存中（从高地址开始）第一个空闲页面
+ */
 unsigned long get_free_page(void)
 {
 register unsigned long __res asm("ax");
 
-__asm__("std ; repne ; scasb\n\t"
-	"jne 1f\n\t"
-	"movb $1,1(%%edi)\n\t"
-	"sall $12,%%ecx\n\t"
-	"addl %2,%%ecx\n\t"
+__asm__("std ; repne ; scasb\n\t" //反向扫描串(mem_map[]), al(0) 与 di 不等则重复(找引用对数为0的项)
+	"jne 1f\n\t" //找不到空闲页，跳转到1
+	"movb $1,1(%%edi)\n\t" //将1赋值给edi+1的位置，在mem_map[]中，将找到0的项的引用计数置为1
+	"sall $12,%%ecx\n\t" //ecx算数左移12位，页面的相对地址
+	"addl %2,%%ecx\n\t" //LOW MEM+ecx，页的物理地址
 	"movl %%ecx,%%edx\n\t"
-	"movl $1024,%%ecx\n\t"
-	"leal 4092(%%edx),%%edi\n\t"
-	"rep ; stosl\n\t"
+	"movl $1024,%%ecx\n\t" 
+	"leal 4092(%%edx),%%edi\n\t" //将edx+4KB的有效地址赋值给edi
+	"rep ; stosl\n\t" //将eax(即"0"(0))赋给edi指向的地址，目的是页面清零
 	"movl %%edx,%%eax\n"
 	"1:"
 	:"=a" (__res)
 	:"0" (0),"i" (LOW_MEM),"c" (PAGING_PAGES),
-	"D" (mem_map+PAGING_PAGES-1)
-	:"di","cx","dx");
+	"D" (mem_map+PAGING_PAGES-1) //edx,mem_map[]最后一个元素
+	:"di","cx","dx"); //第三个冒号后是程序中改变过的量
 return __res;
 }
 
