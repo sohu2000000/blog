@@ -52,21 +52,34 @@ int copy_mem(int nr,struct task_struct * p)
      * 接下来[1][0]为RPL位，用于指示当进程对段访问第请求权限,
      * 而：0x17=0000 0000 0001 0111,表示所以是LDT表中的第二项(数据段描述符).
      *     0x0f=0000 0000 0000 1111,表示LDT表中第一项（代码段描述符）,
-     *     第0项为空描述符,在linux-0.11版本中LDT中只有三项：NULL描述符,数据段描述符,代码段描述符。
+     * 第0项为空描述符,在linux-0.11版本中LDT中只有三项：NULL描述符,数据段描述符,代码段描述符。
      */
-
 	code_limit=get_limit(0x0f); //0x0f即01111：代码段(index = 01 代码段)，LDT(1)，3特权级(11)
 	data_limit=get_limit(0x17); //0x17即10111：数据段(index = 10 数据段)，LDT(1)，3特权级(11)
+    //获取父进程（现在是进程0）的代码段、数据段基地址
 	old_code_base = get_base(current->ldt[1]);
 	old_data_base = get_base(current->ldt[2]);
+
+    //在0.11版本内核中代码段和数据段起始位置相同
 	if (old_data_base != old_code_base)
 		panic("We don't support separate I&D");
+
+    //数据段一般位于代码后面，故而数据段限长不小于代码段
 	if (data_limit < code_limit)
 		panic("Bad data_limit");
+    //现在nr是1，0x4000000是64MB
+    //在0.11版本内核中，某个进程(nr)的起始地址为任务号nr*64MB, 也就是说每个进程代码段+数据段最多使用64MB, 注意这里说的基地址是线性地址，不是物理地址，所以可以超过16MB
 	new_data_base = new_code_base = nr * 0x4000000;
 	p->start_code = new_code_base;
+
+    //设置子进程代码段基地址
 	set_base(p->ldt[1],new_code_base);
+    //设置子进程数据段基地址
 	set_base(p->ldt[2],new_data_base);
+
+    //设置新进程的页目录表项和页表项。即把新进程的线性地址内存页对应到实际物理地址内存页面上
+    //设置页目录表和复制页表
+    //为进程1创建第一个页表、复制进程0的页表，设置进程1的页目录项
 	if (copy_page_tables(old_data_base,new_data_base,data_limit)) {
 		free_page_tables(new_data_base,data_limit);
 		return -ENOMEM;
