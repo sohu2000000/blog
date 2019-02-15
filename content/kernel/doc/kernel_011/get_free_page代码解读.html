@@ -1,144 +1,425 @@
-# GNU嵌入式汇编和get\_free\_page代码解读
+<!DOCTYPE html>
+<html>
+<head>
+<title>get_free_page代码解读</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
 
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+</head>
+<body>
+<h1>get_free_page代码解读</h1>
 <h2 id = 'm'> 目录 </h2>
-
-[教学视频](#t)
-
-[1. 楔子](#1)
-
-[2. 汇编基础知识](#2)
-
-[3. GUN AS 参数语法](#3)
-
-[5. 代码解读](#5)
-
-[附录： 常用汇编代码参考](#6)
-
-[直达底部](#e)
-
+<p><a href="#t">教学视频</a></p>
+<p><a href="#1">1. 楔子</a></p>
+<p><a href="#2">2. 汇编基础知识</a></p>
+<p><a href="#3">3. GUN AS 参数语法</a></p>
+<p><a href="#5">5. 代码解读</a></p>
+<p><a href="#6">附录： 常用汇编代码参考</a></p>
+<p><a href="#e">直达底部</a></p>
 <h2 id = 't'> 教学视频 </h2>
-
-
 <h2 id = '1'> 1. 楔子 </h2>
-  get\_free\_page() 是内核代码中比较难以理解的一段代码，熟悉这段代码，对于我们熟悉和掌握内核中汇编代码有很大帮助，这里我们就对其代码实现进行仔细的阅读。
-
-[返回目录](#m)
-
+<p>get_free_page() 是内核代码中比较难以理解的一段代码，熟悉这段代码，对于我们熟悉和掌握内核中汇编代码有很大帮助，这里我们就对其代码实现进行仔细的阅读。</p>
+<p><a href="#m">返回目录</a></p>
 <h2 id = '2'> 2. 汇编基础知识 </h2>
-
-  我们这里讲解几个本函数用到的汇编代码
-
-1. STOSL指令相当于将EAX中的值保存到 [ES]:EDI 指向的地址中，若设置了 EFLAGS 中的方向位置位(即在STOSL指令前使用STD指令)则EDI自减4，否则(使用CLD指令)EDI自增4 <br/> 
+<p>我们这里讲解几个本函数用到的汇编代码</p>
+<ol>
+<li>
+STOSL指令相当于将EAX中的值保存到 [ES]:EDI 指向的地址中，若设置了 EFLAGS 中的方向位置位(即在STOSL指令前使用STD指令)则EDI自减4，否则(使用CLD指令)EDI自增4 <br/> 
 例如 <br/>
-	cld;rep;stosl<br/>
+cld;rep;stosl<br/>
 cld设置edi或同esi为递增方向，rep做(%ecx)次重复操作，stosl表示edi每次增加4,然后将ax的内容保存到[ES]:EDI中
-2. repe和repne：前者是repeat equal，意思是相等的时候重复，后者是repeat not equal，不等的时候重复；每循环一次cx自动减一，重复cx次；
-3. scasb指令： 将[al] 中的内容和 es:[edi]中的内容进行比较，并且edi自动增加或减少，std则edi--；cld则edi++
-4. sall 指令： sall k,D 等价于 D = D << k 左移
-
-
-[返回目录](#m)
-
+</li>
+<li>repe和repne：前者是repeat equal，意思是相等的时候重复，后者是repeat not equal，不等的时候重复；每循环一次cx自动减一，重复cx次；</li>
+<li>scasb指令： 将[al] 中的内容和 es:[edi]中的内容进行比较，并且edi自动增加或减少，std则edi--；cld则edi++</li>
+<li>sall 指令： sall k,D 等价于 D = D &lt;&lt; k 左移</li>
+</ol>
+<p><a href="#m">返回目录</a></p>
 <h2 id = '3'> 3. GUN AS 参数语法 </h2>
-
-GNU 汇编代码中，对于输入/输出参数有些字符描述符，描述符的意义，作用分别如下
-
-![](https://i.imgur.com/8ZdIakb.png)
-
-![](https://i.imgur.com/2u46Xim.png)
-
-![](https://i.imgur.com/6kRZnNh.png)
-
-
-[返回目录](#m)
-
+<p>GNU 汇编代码中，对于输入/输出参数有些字符描述符，描述符的意义，作用分别如下</p>
+<p><img src="https://i.imgur.com/8ZdIakb.png" /></p>
+<p><img src="https://i.imgur.com/2u46Xim.png" /></p>
+<p><img src="https://i.imgur.com/6kRZnNh.png" /></p>
+<p><a href="#m">返回目录</a></p>
 <h2 id = '5'> 5. 代码解读 </h2>
-
-   get\_free\_page 函数的目的是：寻找mem\_map[0..(PAGING\_PAGES-1)]中的空闲项，即mem_map[i]==0的项，如果找到，就返回其物理地址，找不到返回0，也就是NULL
-
-代码实现如下
-
-![](https://i.imgur.com/HQqdTBR.png)
-
-1. register unsigned long \_\_res asm("ax"); <br/>
-   \_\_res是寄存器级变量，值保存在ax寄存器中,就是说对\_\_res的操作等于ax寄存器的操作
-2. \_\_asm\_\_("std ; repne ; scasb\n\t") <br/>
-  循环比较，找出mem\_map[i]==0的页;<br/>
+<p>get_free_page 函数的目的是：寻找mem_map[0..(PAGING_PAGES-1)]中的空闲项，即mem_map[i]==0的项，如果找到，就返回其物理地址，找不到返回0，也就是NULL</p>
+<p>代码实现如下</p>
+<p><img src="https://i.imgur.com/HQqdTBR.png" /></p>
+<ol>
+<li>register unsigned long __res asm(&quot;ax&quot;); <br/>
+   __res是寄存器级变量，值保存在ax寄存器中,就是说对__res的操作等于ax寄存器的操作</li>
+<li>
+<p>__asm__(&quot;std ; repne ; scasb\n\t&quot;) <br/>
+  循环比较，找出mem_map[i]==0的页;<br/>
   std设置DF=1，所以scasb执行递减操作，即每次edi--，指令涉及寄存器al, ecx, [es]:(e)di 三个寄存器，在函数尾部的定义中 <br/>
-   :"=a" (\_\_res)
-   :"0"(0),"i"(LOW\_MEM),"c"(PAGING\_PAGES),"D"(mem\_map+PAGING\_PAGES-1)
-   :"di","cx","dx"); <br>
+   :&quot;=a&quot; (__res)
+   :&quot;0&quot;(0),&quot;i&quot;(LOW_MEM),&quot;c&quot;(PAGING_PAGES),&quot;D&quot;(mem_map+PAGING_PAGES-1)
+   :&quot;di&quot;,&quot;cx&quot;,&quot;dx&quot;); <br>
    %0 是 ax寄存器 <br/>
-   %1 al = 0, "0" 表示使用与上面同个位置的输出相同的寄存器，eax = 0, 即有 al = 0;    
-   如果mem\_map[i] == 0,表示为空闲页，否则为已分配占用,al保存0值，用于和[es]:edi比较 
-   %2 LOW\_MEM，低端内存标记，即1M <br/>
-   %3 ecx = PAGING\_PAGES; 主内存叶表个数 <br/>
-   %4 es:di = (mem\_map+PAGING\_PAGES-1); 内存管理数组最后一项 <br/> <br/>
+   %1 al = 0, &quot;0&quot; 表示使用与上面同个位置的输出相同的寄存器，eax = 0, 即有 al = 0;    
+   如果mem_map[i] == 0,表示为空闲页，否则为已分配占用,al保存0值，用于和[es]:edi比较 
+   %2 LOW_MEM，低端内存标记，即1M <br/>
+   %3 ecx = PAGING_PAGES; 主内存叶表个数 <br/>
+   %4 es:di = (mem_map+PAGING_PAGES-1); 内存管理数组最后一项 <br/> <br/>
     
-  这句指令的意思是从数组mem\_map[0..(PAGING\_PAGES-1)]的最后一项 mem\_map[PAGING\_PAGES-1]开始，比较mem\_map[i]是否等于0(0值保存在al寄存器中); 每比较一次,[es]:di值自动减1,如果不相等,[es]:di值减1,即mem_map[i--],继续比较,直到ecx==0; 如果相等，则跳出循环。跳出循环的时候，edi已经自动减1了，也就是说指向前面一个元素了。
-
-3. "jne 1f\n\t" 如果mem_map[0..(PAGING_PAGES-1)]均不等于0, 跳转到标签1f处执行,Nf表示向前标签,Nb表示向后标签,N是取值1-10的十进制数字 
-
-4. "movb $1,1(%%edi)\n\t"
-    mem\_map[i]==0是mem\_map[0..(PAGING\_PAGES-1)]中逆序第一个找到的等于0的目标，
-    将edi已经减1了,也就是已经指向了mem\_map[i] = 0元素的前面一个元素了，这里加1就是重新指向mem\_map[i] = 0 的起始地址上，即mem\_map[i]=1,标志为该页已被占用，不是空闲位
-
-5. "sall $12,%%ecx\n\t" 此时ecx保存的是mem_map[i]的下标i,即相对页面数（从LOW_MEM开始）<br/>
+  这句指令的意思是从数组mem_map[0..(PAGING_PAGES-1)]的最后一项 mem_map[PAGING_PAGES-1]开始，比较mem_map[i]是否等于0(0值保存在al寄存器中); 每比较一次,[es]:di值自动减1,如果不相等,[es]:di值减1,即mem_map[i--],继续比较,直到ecx==0; 如果相等，则跳出循环。跳出循环的时候，edi已经自动减1了，也就是说指向前面一个元素了。</p>
+</li>
+<li>
+<p>&quot;jne 1f\n\t&quot; 如果mem<em>map[0..(PAGING</em>PAGES-1)]均不等于0, 跳转到标签1f处执行,Nf表示向前标签,Nb表示向后标签,N是取值1-10的十进制数字 </p>
+</li>
+<li>
+<p>&quot;movb $1,1(%%edi)\n\t&quot;
+    mem_map[i]==0是mem_map[0..(PAGING_PAGES-1)]中逆序第一个找到的等于0的目标，
+    将edi已经减1了,也就是已经指向了mem_map[i] = 0元素的前面一个元素了，这里加1就是重新指向mem_map[i] = 0 的起始地址上，即mem_map[i]=1,标志为该页已被占用，不是空闲位</p>
+</li>
+<li>
+<p>&quot;sall $12,%%ecx\n\t&quot; 此时ecx保存的是mem<em>map[i]的下标i,即相对页面数（从LOW</em>MEM开始）<br/>
     举例: <br/>
-        假设mem\_map[0..(PAGING\_PAGES-1)]最后一个参数
-    mem\_map[PAGING\_PAGES-1] == 0，即i == (PAGING\_PAGES-1),
-    所以此时\*ecx == PAGING\_PAGES-1;
-    此时相对页面地址是4k*(PAGING\_PAGES-1), 也就是(PAGING\_PAGES-1) << 12
-
-6.  "addl %2,%%ecx\n\t" 加上低端内存地址，得到实际物理地址, %2等于LOW\_MEM，在如下语句中定义"0" (0),"i" (LOW\_MEM),"c" (PAGING\_PAGES)
-
-7. "movl %%ecx,%%edx\n\t"
-    将ecx寄存器的值保存到edx寄存器中，即将实际物理地址保存到edx寄存器中。
-
-8. "movl $1024,%%ecx\n\t"
-    将1024保存到ecx寄存器中，因为每一页占用4096字节(4K), 每次写入4个字节，写入1024次
-
-9.  "leal 4092(%%edx),%%edi\n\t", 
-    取当前物理页最后一个字节的起始地址： 4096 = 4096-4 = 1023*4 = (1024-1)*4 。
-    将当前物理页最后一个字节的起始物理地址保存在edi寄存器中, 即ecx+4092处的地址保存在edi寄存器中。
-
-10. "rep ; stosl\n\t" 从ecx+4092处开始，反方向，步进4字节，重复1024次，将该物理页1024项全部填入eax寄存器的值，在如下代码定义中，eax初始化为0(al=0,eax=0,ax=0)
-    :"0" (0),"i" (LOW_MEM),"c" (PAGING_PAGES), <br/>
-    所以该物理页项全部清零。
-
-11. "movl %%edx,%%eax\n"，将该物理页面起始地址放入eax寄存器中，Intel的EABI规则中，eax寄存器用于保存函数返回值
-
-12. "1:" 标签1，用于"jne 1f\n\t"语句跳转返回0值，<br/>
-    注意：eax寄存器只在"movl %%edx,%%eax\n"中被赋值，eax寄存器初始值是'0'，如果跳转到标签"1:"处，返回值是0，表示没有空闲物理页。
-
-13. :"=a" (__res) 输出寄存器列表，这里只有一个，其中a表示eax寄存器
-
-14. :"0" (0),"i" (LOW\_MEM),"c" (PAGING\_PAGES), <br/>
-    "0"表示与上面同个位置的输出相同的寄存器，即"0"等于输出寄存器eax，即eax既是输出寄存器，同时也是输入寄存器，当然，在时间颗粒度最小的情况小，eax不能同时作为输入或者输出寄存器，
+        假设mem_map[0..(PAGING_PAGES-1)]最后一个参数
+    mem_map[PAGING_PAGES-1] == 0，即i == (PAGING_PAGES-1),
+    所以此时*ecx == PAGING_PAGES-1;
+    此时相对页面地址是4k*(PAGING_PAGES-1), 也就是(PAGING_PAGES-1) &lt;&lt; 12</p>
+</li>
+<li>
+<p> &quot;addl %2,%%ecx\n\t&quot; 加上低端内存地址，得到实际物理地址, %2等于LOW_MEM，在如下语句中定义&quot;0&quot; (0),&quot;i&quot; (LOW_MEM),&quot;c&quot; (PAGING_PAGES)</p>
+</li>
+<li>
+<p>&quot;movl %%ecx,%%edx\n\t&quot;
+    将ecx寄存器的值保存到edx寄存器中，即将实际物理地址保存到edx寄存器中。</p>
+</li>
+<li>
+<p>&quot;movl $1024,%%ecx\n\t&quot;
+    将1024保存到ecx寄存器中，因为每一页占用4096字节(4K), 每次写入4个字节，写入1024次</p>
+</li>
+<li>
+<p>&quot;leal 4092(%%edx),%%edi\n\t&quot;, 
+    取当前物理页最后一个字节的起始地址： 4096 = 4096-4 = 1023<em>4 = (1024-1)</em>4 。
+    将当前物理页最后一个字节的起始物理地址保存在edi寄存器中, 即ecx+4092处的地址保存在edi寄存器中。</p>
+</li>
+<li>
+<p>&quot;rep ; stosl\n\t&quot; 从ecx+4092处开始，反方向，步进4字节，重复1024次，将该物理页1024项全部填入eax寄存器的值，在如下代码定义中，eax初始化为0(al=0,eax=0,ax=0)
+    :&quot;0&quot; (0),&quot;i&quot; (LOW<em>MEM),&quot;c&quot; (PAGING</em>PAGES), <br/>
+    所以该物理页项全部清零。</p>
+</li>
+<li>
+<p>&quot;movl %%edx,%%eax\n&quot;，将该物理页面起始地址放入eax寄存器中，Intel的EABI规则中，eax寄存器用于保存函数返回值</p>
+</li>
+<li>
+<p>&quot;1:&quot; 标签1，用于&quot;jne 1f\n\t&quot;语句跳转返回0值，<br/>
+    注意：eax寄存器只在&quot;movl %%edx,%%eax\n&quot;中被赋值，eax寄存器初始值是'0'，如果跳转到标签&quot;1:&quot;处，返回值是0，表示没有空闲物理页。</p>
+</li>
+<li>
+<p>:&quot;=a&quot; (__res) 输出寄存器列表，这里只有一个，其中a表示eax寄存器</p>
+</li>
+<li>
+<p>:&quot;0&quot; (0),&quot;i&quot; (LOW_MEM),&quot;c&quot; (PAGING_PAGES), <br/>
+    &quot;0&quot;表示与上面同个位置的输出相同的寄存器，即&quot;0&quot;等于输出寄存器eax，即eax既是输出寄存器，同时也是输入寄存器，当然，在时间颗粒度最小的情况小，eax不能同时作为输入或者输出寄存器，
     只能作为输入或者输出寄存器; <br/>
-    "i" (LOW\_MEM)是%2，从输出寄存器到输入寄存器依次编号%0，%1，%2.....%N,
-    其中"i"表示立即数，不是edi的代号，edi的代号是"D"; <br/>
-    "c" (PAGING_PAGES)表示将ecx寄存器存入PAGING_PAGES，ecx寄存器代号"c"。
-
-15. "D" (mem_map+PAGING\_PAGES-1)
-    "D"使用edi寄存器，即edi寄存器保存的值是(mem\_map+PAGING\_PAGES-1)
-    即%%edi = &mem\_map[PAGING\_PAGES-1]。
-
-16. :"di","cx","dx");
-    保留寄存器，告诉编译器"di","cx","dx"三个寄存器已经被分配，在编译器编译中，不会将这三个寄存器分配为输入或者输出寄存器。
-
-17. return \_\_res; <br/>
-    返回\_\_res保存的值，相当于汇编的ret，隐含将eax寄存器返回，C语言中是显式返回。
-
-[返回目录](#m)
-
-
+    &quot;i&quot; (LOW_MEM)是%2，从输出寄存器到输入寄存器依次编号%0，%1，%2.....%N,
+    其中&quot;i&quot;表示立即数，不是edi的代号，edi的代号是&quot;D&quot;; <br/>
+    &quot;c&quot; (PAGING<em>PAGES)表示将ecx寄存器存入PAGING</em>PAGES，ecx寄存器代号&quot;c&quot;。</p>
+</li>
+<li>
+<p>&quot;D&quot; (mem_map+PAGING_PAGES-1)
+    &quot;D&quot;使用edi寄存器，即edi寄存器保存的值是(mem_map+PAGING_PAGES-1)
+    即%%edi = &amp;mem_map[PAGING_PAGES-1]。</p>
+</li>
+<li>
+<p>:&quot;di&quot;,&quot;cx&quot;,&quot;dx&quot;);
+    保留寄存器，告诉编译器&quot;di&quot;,&quot;cx&quot;,&quot;dx&quot;三个寄存器已经被分配，在编译器编译中，不会将这三个寄存器分配为输入或者输出寄存器。</p>
+</li>
+<li>
+<p>return __res; <br/>
+    返回__res保存的值，相当于汇编的ret，隐含将eax寄存器返回，C语言中是显式返回。</p>
+</li>
+</ol>
+<p><a href="#m">返回目录</a></p>
 <h2 id = '6'>附录： 常用汇编代码参考 </h2>
-
-**汇编指令** 
-
-GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
-
+<p><strong>汇编指令</strong> </p>
+<p>GAS中每个操作都是有一个字符的后缀，表明操作数的大小。</p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -220,13 +501,8 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table>
-
-**注意**：GAL使用后缀“l”同时表示4字节整数和8字节双精度浮点数，这不会产生歧义因为浮点数使用的是完全不同的指令和寄存器。
-
- 
-
-**操作数格式：**
-
+<p><strong>注意</strong>：GAL使用后缀“l”同时表示4字节整数和8字节双精度浮点数，这不会产生歧义因为浮点数使用的是完全不同的指令和寄存器。</p>
+<p><strong>操作数格式：</strong></p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -399,11 +675,10 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table>
-
-> 注：M[xx]表示在存储器中xx地址的值，R[xx]表示寄存器xx的值，这种表示方法将寄存器、内存都看出一个大数组的形式。
-
-** 数据传送指令：**
-
+<blockquote>
+<p>注：M[xx]表示在存储器中xx地址的值，R[xx]表示寄存器xx的值，这种表示方法将寄存器、内存都看出一个大数组的形式。</p>
+</blockquote>
+<p>** 数据传送指令：**</p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -498,12 +773,10 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table>
-
-> 注：均假设栈往低地址扩展。
-
-
-**算数和逻辑操作地址：**
-
+<blockquote>
+<p>注：均假设栈往低地址扩展。</p>
+</blockquote>
+<p><strong>算数和逻辑操作地址：</strong></p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -684,10 +957,7 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table>
- 
-
-**特殊算术操作：**
-
+<p><strong>特殊算术操作：</strong></p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -760,21 +1030,16 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table>
-
-> 注：64位数通常存储为，高32位放在edx，低32位放在eax。
-
- 
-条件码：
-
-条件码寄存器描述了最近的算数或逻辑操作的属性。
-
-**CF**：进位标志，最高位产生了进位，可用于检查无符号数溢出。<br/>
-**OF**：溢出标志，二进制补码溢出——正溢出或负溢出。 <br/>
-**ZF**：零标志，结果为0。 <br/>
-**SF**：符号标志，操作结果为负。 <br/>
-
-**比较指令：**
-
+<blockquote>
+<p>注：64位数通常存储为，高32位放在edx，低32位放在eax。</p>
+</blockquote>
+<p>条件码：</p>
+<p>条件码寄存器描述了最近的算数或逻辑操作的属性。</p>
+<p><strong>CF</strong>：进位标志，最高位产生了进位，可用于检查无符号数溢出。<br/>
+<strong>OF</strong>：溢出标志，二进制补码溢出——正溢出或负溢出。 <br/>
+<strong>ZF</strong>：零标志，结果为0。 <br/>
+<strong>SF</strong>：符号标志，操作结果为负。 <br/></p>
+<p><strong>比较指令：</strong></p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -856,9 +1121,7 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table> 
-
-**访问条件码指令：**
-
+<p><strong>访问条件码指令：</strong></p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -1045,10 +1308,7 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table>
-
- 
-**跳转指令：**
-
+<p><strong>跳转指令：</strong></p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -1263,10 +1523,7 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table>
-
-
-**转移控制指令（函数调用）：**
-
+<p><strong>转移控制指令（函数调用）：</strong></p>
 <table border="1" cellspacing="0" cellpadding="0">
 	<tbody>
 		<tr>
@@ -1300,17 +1557,17 @@ GAS中每个操作都是有一个字符的后缀，表明操作数的大小。
 		</tr>
 	</tbody>
 </table>
+<p>LEAVE指令是将栈指针指向帧指针，然后POP备份的原帧指针到%EBP
+Leave等价于：</p>
+<pre><code>/* leave指令将EBP寄存器的内容复制到ESP寄存器中，
+ * 以释放分配给该过程的所有堆栈空间。然后，它从堆栈恢复EBP寄存器的旧值。
+ * /
+movl %esp %ebp 
+popl %ebp
+</code></pre>
 
-LEAVE指令是将栈指针指向帧指针，然后POP备份的原帧指针到%EBP
-Leave等价于：
-
-	/* leave指令将EBP寄存器的内容复制到ESP寄存器中，
-	 * 以释放分配给该过程的所有堆栈空间。然后，它从堆栈恢复EBP寄存器的旧值。
-	 * /
-	movl %esp %ebp 
-	popl %ebp
-
-
-[返回目录](#m)
-
+<p><a href="#m">返回目录</a></p>
 <p id = 'e'> </p>
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->
